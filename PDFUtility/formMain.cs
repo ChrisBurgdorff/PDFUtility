@@ -243,6 +243,7 @@ namespace PDFUtility
         private void btnSelectOutput_Click(object sender, EventArgs e)
         {
             //GITHUB TEST
+            //SDFSDFK
             dialogFolderBates.ShowDialog();
             var folder = dialogFolderBates.SelectedPath;
             Globals.outputFolder = folder;
