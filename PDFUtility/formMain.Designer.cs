@@ -111,6 +111,7 @@
             this.lstBatesFiles.TabIndex = 10;
             this.lstBatesFiles.UseCompatibleStateImageBehavior = false;
             this.lstBatesFiles.ItemDrag += new System.Windows.Forms.ItemDragEventHandler(this.lstBatesFiles_ItemDrag);
+            this.lstBatesFiles.KeyUp += new System.Windows.Forms.KeyEventHandler(this.lstBatesFiles_KeyUp);
             this.lstBatesFiles.MouseDown += new System.Windows.Forms.MouseEventHandler(this.lstBatesFiles_MouseDown);
             this.lstBatesFiles.MouseUp += new System.Windows.Forms.MouseEventHandler(this.lstBatesFiles_MouseUp);
             // 
@@ -227,7 +228,7 @@
             // 
             // dialogFileBates
             // 
-            this.dialogFileBates.FileName = "openFileDialog1";
+            this.dialogFileBates.Filter = "PDF files|*.pdf|All files|*.*";
             this.dialogFileBates.Multiselect = true;
             // 
             // menuStrip1
@@ -254,7 +255,7 @@
             // 
             this.exitToolStripMenuItem.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
             this.exitToolStripMenuItem.Name = "exitToolStripMenuItem";
-            this.exitToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.exitToolStripMenuItem.Size = new System.Drawing.Size(94, 22);
             this.exitToolStripMenuItem.Text = "Exit";
             this.exitToolStripMenuItem.Click += new System.EventHandler(this.exitToolStripMenuItem_Click);
             // 

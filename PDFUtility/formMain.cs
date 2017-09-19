@@ -233,6 +233,17 @@ namespace PDFUtility
             lstBatesFiles.Items.Clear();
             FixFileList();
         }
+        private void lstBatesFiles_KeyUp(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Delete)
+            {
+                foreach (ListViewItem eachItem in lstBatesFiles.SelectedItems)
+                {
+                    lstBatesFiles.Items.Remove(eachItem);
+                }
+                FixFileList();
+            }
+        }
         #endregion
 
         private void exitToolStripMenuItem_Click(object sender, EventArgs e)
