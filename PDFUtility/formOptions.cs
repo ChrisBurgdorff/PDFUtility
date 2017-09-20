@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using PDFUtility;
 
 namespace PDFUtility
 {
@@ -33,7 +34,8 @@ namespace PDFUtility
 
         private void formOptions_Load(object sender, EventArgs e)
         {
-
+            //Set all option values
+            trackTransparency.Value = Convert.ToInt32(Globals.stampTransparency * 100);
         }
 
         private void btnSelectFont_Click(object sender, EventArgs e)
@@ -49,8 +51,22 @@ namespace PDFUtility
             float newTransparency = trackTransparency.Value;
             int alpha = Convert.ToInt32((newTransparency / 100) * 255);
             //MessageBox.Show(alpha.ToString());
-            lblSampleText.ForeColor = Color.FromArgb(alpha, Color.Black);
-            lblSampleText.ForeColor = Color.Blue;
+            //lblSampleText.ForeColor = Color.FromArgb(alpha, Color.Black);
+            //lblSampleText.ForeColor = Color.Blue;
+            lblTransparencyNumber.Text = Math.Round( (newTransparency / 100), 2).ToString();
+        }
+
+        private void btnCancel_Click(object sender, EventArgs e)
+        {
+            this.Close();
+        }
+
+        private void btnOK_Click(object sender, EventArgs e)
+        {
+            //Save all selected options
+            //Globals.stampLocation = lblLocation.Text;
+            Globals.stampTransparency = (trackTransparency.Value / 100);
+            this.Close();
         }
     }
 }

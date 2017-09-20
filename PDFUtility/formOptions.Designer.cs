@@ -28,12 +28,18 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(formOptions));
             this.dialogFontBates = new System.Windows.Forms.FontDialog();
             this.pnlLocation = new System.Windows.Forms.Panel();
             this.btnSelectFont = new System.Windows.Forms.Button();
             this.trackTransparency = new System.Windows.Forms.TrackBar();
             this.lblSampleText = new System.Windows.Forms.Label();
             this.lblTransparency = new System.Windows.Forms.Label();
+            this.comboBoxLocation = new System.Windows.Forms.ComboBox();
+            this.lblLocation = new System.Windows.Forms.Label();
+            this.lblTransparencyNumber = new System.Windows.Forms.Label();
+            this.btnOK = new System.Windows.Forms.Button();
+            this.btnCancel = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.trackTransparency)).BeginInit();
             this.SuspendLayout();
             // 
@@ -61,7 +67,7 @@
             this.trackTransparency.Location = new System.Drawing.Point(351, 245);
             this.trackTransparency.Maximum = 100;
             this.trackTransparency.Name = "trackTransparency";
-            this.trackTransparency.Size = new System.Drawing.Size(215, 45);
+            this.trackTransparency.Size = new System.Drawing.Size(215, 42);
             this.trackTransparency.TabIndex = 2;
             this.trackTransparency.TickFrequency = 10;
             this.trackTransparency.TickStyle = System.Windows.Forms.TickStyle.TopLeft;
@@ -86,17 +92,78 @@
             this.lblTransparency.TabIndex = 4;
             this.lblTransparency.Text = "Transparency";
             // 
+            // comboBoxLocation
+            // 
+            this.comboBoxLocation.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.comboBoxLocation.FormattingEnabled = true;
+            this.comboBoxLocation.Items.AddRange(new object[] {
+            "Lower Right",
+            "Lower Left",
+            "Upper Right",
+            "Upper Left",
+            "Center",
+            "Center Bottom",
+            "Center Top"});
+            this.comboBoxLocation.Location = new System.Drawing.Point(132, 245);
+            this.comboBoxLocation.Name = "comboBoxLocation";
+            this.comboBoxLocation.Size = new System.Drawing.Size(150, 21);
+            this.comboBoxLocation.TabIndex = 5;
+            // 
+            // lblLocation
+            // 
+            this.lblLocation.AutoSize = true;
+            this.lblLocation.Location = new System.Drawing.Point(75, 248);
+            this.lblLocation.Name = "lblLocation";
+            this.lblLocation.Size = new System.Drawing.Size(51, 13);
+            this.lblLocation.TabIndex = 6;
+            this.lblLocation.Text = "Location:";
+            // 
+            // lblTransparencyNumber
+            // 
+            this.lblTransparencyNumber.AutoSize = true;
+            this.lblTransparencyNumber.Location = new System.Drawing.Point(498, 293);
+            this.lblTransparencyNumber.Name = "lblTransparencyNumber";
+            this.lblTransparencyNumber.Size = new System.Drawing.Size(13, 13);
+            this.lblTransparencyNumber.TabIndex = 7;
+            this.lblTransparencyNumber.Text = "1";
+            // 
+            // btnOK
+            // 
+            this.btnOK.Location = new System.Drawing.Point(434, 341);
+            this.btnOK.Name = "btnOK";
+            this.btnOK.Size = new System.Drawing.Size(67, 45);
+            this.btnOK.TabIndex = 8;
+            this.btnOK.Text = "OK";
+            this.btnOK.UseVisualStyleBackColor = true;
+            this.btnOK.Click += new System.EventHandler(this.btnOK_Click);
+            // 
+            // btnCancel
+            // 
+            this.btnCancel.Location = new System.Drawing.Point(564, 342);
+            this.btnCancel.Name = "btnCancel";
+            this.btnCancel.Size = new System.Drawing.Size(77, 43);
+            this.btnCancel.TabIndex = 9;
+            this.btnCancel.Text = "Cancel";
+            this.btnCancel.UseVisualStyleBackColor = true;
+            this.btnCancel.Click += new System.EventHandler(this.btnCancel_Click);
+            // 
             // formOptions
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.SystemColors.MenuBar;
             this.ClientSize = new System.Drawing.Size(701, 418);
+            this.Controls.Add(this.btnCancel);
+            this.Controls.Add(this.btnOK);
+            this.Controls.Add(this.lblTransparencyNumber);
+            this.Controls.Add(this.lblLocation);
+            this.Controls.Add(this.comboBoxLocation);
             this.Controls.Add(this.lblTransparency);
             this.Controls.Add(this.lblSampleText);
             this.Controls.Add(this.trackTransparency);
             this.Controls.Add(this.btnSelectFont);
             this.Controls.Add(this.pnlLocation);
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "formOptions";
             this.Text = "formOptions";
             this.Load += new System.EventHandler(this.formOptions_Load);
@@ -114,5 +181,10 @@
         private System.Windows.Forms.TrackBar trackTransparency;
         private System.Windows.Forms.Label lblSampleText;
         private System.Windows.Forms.Label lblTransparency;
+        private System.Windows.Forms.ComboBox comboBoxLocation;
+        private System.Windows.Forms.Label lblLocation;
+        private System.Windows.Forms.Label lblTransparencyNumber;
+        private System.Windows.Forms.Button btnOK;
+        private System.Windows.Forms.Button btnCancel;
     }
 }
