@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using PDFUtility;
 
-namespace PDFUtility
+namespace PDFUtilityOptions
 {
     public partial class formOptions : Form
     {
@@ -26,10 +26,44 @@ namespace PDFUtility
             // Draw line to screen.
             e.Graphics.DrawLine(pen, point1, point2);
         }
+        private void InitializeOptions()
+        {
+            float transparency;
+            PDFUtility.Location stampLocation = Globals.stampLocation;
+
+            switch (stampLocation)
+            {
+                case PDFUtility.Location.LOWER_RIGHT:
+                    comboBoxLocation.SelectedIndex = 0;
+                    break;
+                case PDFUtility.Location.LOWER_LEFT:
+                    comboBoxLocation.SelectedIndex = 1;
+                    break;
+                case PDFUtility.Location.UPPER_RIGHT:
+                    comboBoxLocation.SelectedIndex = 2;
+                    break;
+                case PDFUtility.Location.UPPER_LEFT:
+                    comboBoxLocation.SelectedIndex = 3;
+                    break;
+                case PDFUtility.Location.CENTER:
+                    comboBoxLocation.SelectedIndex = 4;
+                    break;
+                case PDFUtility.Location.CENTER_BOTTOM:
+                    comboBoxLocation.SelectedIndex = 5;
+                    break;
+                case PDFUtility.Location.CENTER_TOP:
+                    comboBoxLocation.SelectedIndex = 6;
+                    break;
+            }
+            transparency = Globals.stampTransparency;
+            MessageBox.Show((transparency * 100).ToString());
+            trackTransparency.Value = Convert.ToInt32(transparency * 100);
+        }
         public formOptions()
         {
             InitializeComponent();
             this.Text = Globals.appName + " - " + "Options";
+            InitializeOptions();
         }
 
         private void formOptions_Load(object sender, EventArgs e)
@@ -64,8 +98,33 @@ namespace PDFUtility
         private void btnOK_Click(object sender, EventArgs e)
         {
             //Save all selected options
-            //Globals.stampLocation = lblLocation.Text;
-            Globals.stampTransparency = (trackTransparency.Value / 100);
+            float transparency;
+            transparency = (float)trackTransparency.Value / 100;
+            Globals.stampTransparency = transparency;
+            switch (comboBoxLocation.SelectedIndex)
+            {
+                case 0:
+                    Globals.stampLocation = PDFUtility.Location.LOWER_RIGHT;
+                    break;
+                case 1:
+                    Globals.stampLocation = PDFUtility.Location.LOWER_LEFT;
+                    break;
+                case 2:
+                    Globals.stampLocation = PDFUtility.Location.UPPER_RIGHT;
+                    break;
+                case 3:
+                    Globals.stampLocation = PDFUtility.Location.UPPER_LEFT;
+                    break;
+                case 4:
+                    Globals.stampLocation = PDFUtility.Location.CENTER;
+                    break;
+                case 5:
+                    Globals.stampLocation = PDFUtility.Location.CENTER_BOTTOM;
+                    break;
+                case 6:
+                    Globals.stampLocation = PDFUtility.Location.CENTER_TOP;
+                    break;
+            }
             this.Close();
         }
     }

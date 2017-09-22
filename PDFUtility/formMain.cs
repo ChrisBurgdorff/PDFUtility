@@ -389,7 +389,7 @@ namespace PDFUtility
 
         private void btnOptions_Click(object sender, EventArgs e)
         {
-            formOptions form = new formOptions();
+            PDFUtilityOptions.formOptions form = new PDFUtilityOptions.formOptions();
             form.Show();
         }
 
@@ -499,6 +499,32 @@ namespace PDFUtility
                     form1.UpdateStatus(i+1, files.Length, Activity.BATES_STAMPING);
                     if (Path.GetExtension(fileName) == ".pdf")
                     {
+                        //Smart Stamping
+                        PdfReader pReader = new PdfReader(fileName);
+                        int numPages = pReader.NumberOfPages;
+                        Document doc = new Document();
+                        fileNameOnly = Path.GetFileName(fileName);
+                        outputPath = outputFolder + @"\" + fileNameOnly;
+                        PdfWriter pWriter = PdfWriter.GetInstance(doc, new FileStream(outputPath, FileMode.Create, FileAccess.Write));
+                        doc.Open();
+                        iTextSharp.text.Image img;
+                        PdfImportedPage page;
+                        PdfContentByte directContent = new PdfContentByte(pWriter);
+                        for (int k = 1; k <= numPages; k++)
+                        {
+                            page = pWriter.GetImportedPage(pReader, k);
+                            img = iTextSharp.text.Image.GetInstance(page);
+                            img.ScaleAbsolute(PageSize.A4.Width - 72, PageSize.A4.Height - 72);
+                            img.SetAbsolutePosition(36, 36);
+                            directContent.AddImage(img);
+                            doc.Add(img);
+                            doc.NewPage();
+                        }
+                        doc.Close();
+                        pReader.Close();
+                        pWriter.Close();
+                        fileName = outputPath;
+                        //End Smart Stamping
                         using (var reader = new PdfReader(fileName))
                         {
                             fileNameOnly = Path.GetFileName(fileName);
@@ -565,7 +591,7 @@ namespace PDFUtility
                                     PdfGState gState = new PdfGState();
                                     gState.FillOpacity = Globals.stampTransparency;
                                     contentByte.SetGState(gState);
-                                    ColumnText.ShowTextAligned(contentByte, alignment, p, printX, printY, 0);  //Get acutal coordinates based on Page size
+                                    ColumnText.ShowTextAligned(contentByte, alignment, p, printX, printY, 0); 
                                 }//End For
                             }//End using
                             reader.Close();
