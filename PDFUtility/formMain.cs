@@ -37,7 +37,6 @@ namespace PDFUtility
 
     public partial class formMain : Form
     {
-        #region form
         public formMain()
         {
             InitializeComponent();
@@ -55,9 +54,12 @@ namespace PDFUtility
             txtFolderBates.Text = Globals.outputFolder;
             InitializeSaveFile();
         }
-        #endregion
 
-        #region Buttons
+        private void folderBrowserDialog1_HelpRequest(object sender, EventArgs e)
+        {
+
+        }
+
         private void btnSelectFolderBates_Click(object sender, EventArgs e)
         {
             dialogFolderBates.ShowDialog();
@@ -91,7 +93,7 @@ namespace PDFUtility
             if (int.TryParse(txtStartNumber.Text, out startNumber))
             {
                 // it's a valid integer
-                pu.BatesStamp(files, startNumber, batesPrefix);
+                pu.BatesStamp(files,startNumber,batesPrefix);
                 txtStartNumber.Text = Globals.currentBates.ToString();
             }
             else
@@ -99,46 +101,6 @@ namespace PDFUtility
                 MessageBox.Show("Please enter a valid number in the Start At field.", Globals.appName, MessageBoxButtons.OK, MessageBoxIcon.Asterisk);
             }
         }
-        private void btnSelectOutput_Click(object sender, EventArgs e)
-        {
-            //GITHUB TEST
-            //SDFSDFK
-            dialogFolderBates.ShowDialog();
-            var folder = dialogFolderBates.SelectedPath;
-            Globals.outputFolder = folder;
-            txtFolderBates.Text = folder;
-            SaveFileStatic.outputFolder = folder;
-        }
-        private void btnOptions_Click(object sender, EventArgs e)
-        {
-            formOptions form = new formOptions();
-            form.Show();
-        }
-        private void btnSaveProject_Click(object sender, EventArgs e)
-        {
-            SaveFileDialog sfd = new SaveFileDialog();
-            sfd.Filter = "Bates Plus Plus Files|*.bpp";
-            sfd.DefaultExt = ".bpp";
-            if (sfd.ShowDialog() == DialogResult.OK)
-            {
-                ClearStatus(SaveProject(sfd.FileName));
-            }
-        }
-
-        private void btnOpenProject_Click(object sender, EventArgs e)
-        {
-            OpenFileDialog ofd = new OpenFileDialog();
-            ofd.Filter = "Bates Plus Plus Files|*.bpp";
-            ofd.DefaultExt = ".bpp";
-            if (ofd.ShowDialog() == DialogResult.OK)
-            {
-                ClearStatus(LoadProject(ofd.FileName));
-            }
-        }
-        #endregion
-
-
-        
         #region ListView
         private void ResizeListViewColumns(ListView lv)
         {
@@ -284,13 +246,21 @@ namespace PDFUtility
         }
         #endregion
 
-        #region Menu
         private void exitToolStripMenuItem_Click(object sender, EventArgs e)
         {
             Application.Exit();
         }
-        #endregion
-        
+
+        private void btnSelectOutput_Click(object sender, EventArgs e)
+        {
+            //GITHUB TEST
+            //SDFSDFK
+            dialogFolderBates.ShowDialog();
+            var folder = dialogFolderBates.SelectedPath;
+            Globals.outputFolder = folder;
+            txtFolderBates.Text = folder;
+            SaveFileStatic.outputFolder = folder;
+        }
         #region AddFilesAndFolders
         private void btnAddFolderBates_Click(object sender, EventArgs e)
         {
@@ -417,7 +387,11 @@ namespace PDFUtility
             FixFileList();
         }
 
-
+        private void btnOptions_Click(object sender, EventArgs e)
+        {
+            PDFUtilityOptions.formOptions form = new PDFUtilityOptions.formOptions();
+            form.Show();
+        }
 
         #region Save and Load
         private void InitializeSaveFile()
@@ -468,7 +442,28 @@ namespace PDFUtility
             return response;
         }
         #endregion
-        
+
+        private void btnSaveProject_Click(object sender, EventArgs e)
+        {
+            SaveFileDialog sfd = new SaveFileDialog();
+            sfd.Filter = "Bates Plus Plus Files|*.bpp";
+            sfd.DefaultExt = ".bpp";
+            if (sfd.ShowDialog() == DialogResult.OK)
+            {
+                ClearStatus(SaveProject(sfd.FileName));
+            }
+        }
+
+        private void btnOpenProject_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog ofd = new OpenFileDialog();
+            ofd.Filter = "Bates Plus Plus Files|*.bpp";
+            ofd.DefaultExt = ".bpp";
+            if (ofd.ShowDialog() == DialogResult.OK)
+            {
+                ClearStatus(LoadProject(ofd.FileName));
+            }
+        }
     }
 
     public partial class PDFUtility
@@ -504,6 +499,32 @@ namespace PDFUtility
                     form1.UpdateStatus(i+1, files.Length, Activity.BATES_STAMPING);
                     if (Path.GetExtension(fileName) == ".pdf")
                     {
+                        //Smart Stamping
+                        PdfReader pReader = new PdfReader(fileName);
+                        int numPages = pReader.NumberOfPages;
+                        Document doc = new Document();
+                        fileNameOnly = Path.GetFileName(fileName);
+                        outputPath = outputFolder + @"\" + fileNameOnly;
+                        PdfWriter pWriter = PdfWriter.GetInstance(doc, new FileStream(outputPath, FileMode.Create, FileAccess.Write));
+                        doc.Open();
+                        iTextSharp.text.Image img;
+                        PdfImportedPage page;
+                        PdfContentByte directContent = new PdfContentByte(pWriter);
+                        for (int k = 1; k <= numPages; k++)
+                        {
+                            page = pWriter.GetImportedPage(pReader, k);
+                            img = iTextSharp.text.Image.GetInstance(page);
+                            img.ScaleAbsolute(PageSize.A4.Width - 72, PageSize.A4.Height - 72);
+                            img.SetAbsolutePosition(36, 36);
+                            directContent.AddImage(img);
+                            doc.Add(img);
+                            doc.NewPage();
+                        }
+                        doc.Close();
+                        pReader.Close();
+                        pWriter.Close();
+                        fileName = outputPath;
+                        //End Smart Stamping
                         using (var reader = new PdfReader(fileName))
                         {
                             fileNameOnly = Path.GetFileName(fileName);
@@ -570,7 +591,7 @@ namespace PDFUtility
                                     PdfGState gState = new PdfGState();
                                     gState.FillOpacity = Globals.stampTransparency;
                                     contentByte.SetGState(gState);
-                                    ColumnText.ShowTextAligned(contentByte, alignment, p, printX, printY, 0);  //Get acutal coordinates based on Page size
+                                    ColumnText.ShowTextAligned(contentByte, alignment, p, printX, printY, 0); 
                                 }//End For
                             }//End using
                             reader.Close();

@@ -1,4 +1,4 @@
-﻿namespace PDFUtility
+﻿namespace PDFUtilityOptions
 {
     partial class formOptions
     {
