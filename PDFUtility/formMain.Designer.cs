@@ -224,7 +224,6 @@
             // 
             // dialogFolderBates
             // 
-            this.dialogFolderBates.HelpRequest += new System.EventHandler(this.folderBrowserDialog1_HelpRequest);
             // 
             // dialogFileBates
             // 

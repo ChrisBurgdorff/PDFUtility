@@ -37,6 +37,7 @@ namespace PDFUtility
 
     public partial class formMain : Form
     {
+        #region form
         public formMain()
         {
             InitializeComponent();
@@ -54,12 +55,9 @@ namespace PDFUtility
             txtFolderBates.Text = Globals.outputFolder;
             InitializeSaveFile();
         }
+        #endregion
 
-        private void folderBrowserDialog1_HelpRequest(object sender, EventArgs e)
-        {
-
-        }
-
+        #region Buttons
         private void btnSelectFolderBates_Click(object sender, EventArgs e)
         {
             dialogFolderBates.ShowDialog();
@@ -93,7 +91,7 @@ namespace PDFUtility
             if (int.TryParse(txtStartNumber.Text, out startNumber))
             {
                 // it's a valid integer
-                pu.BatesStamp(files,startNumber,batesPrefix);
+                pu.BatesStamp(files, startNumber, batesPrefix);
                 txtStartNumber.Text = Globals.currentBates.ToString();
             }
             else
@@ -101,6 +99,46 @@ namespace PDFUtility
                 MessageBox.Show("Please enter a valid number in the Start At field.", Globals.appName, MessageBoxButtons.OK, MessageBoxIcon.Asterisk);
             }
         }
+        private void btnSelectOutput_Click(object sender, EventArgs e)
+        {
+            //GITHUB TEST
+            //SDFSDFK
+            dialogFolderBates.ShowDialog();
+            var folder = dialogFolderBates.SelectedPath;
+            Globals.outputFolder = folder;
+            txtFolderBates.Text = folder;
+            SaveFileStatic.outputFolder = folder;
+        }
+        private void btnOptions_Click(object sender, EventArgs e)
+        {
+            formOptions form = new formOptions();
+            form.Show();
+        }
+        private void btnSaveProject_Click(object sender, EventArgs e)
+        {
+            SaveFileDialog sfd = new SaveFileDialog();
+            sfd.Filter = "Bates Plus Plus Files|*.bpp";
+            sfd.DefaultExt = ".bpp";
+            if (sfd.ShowDialog() == DialogResult.OK)
+            {
+                ClearStatus(SaveProject(sfd.FileName));
+            }
+        }
+
+        private void btnOpenProject_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog ofd = new OpenFileDialog();
+            ofd.Filter = "Bates Plus Plus Files|*.bpp";
+            ofd.DefaultExt = ".bpp";
+            if (ofd.ShowDialog() == DialogResult.OK)
+            {
+                ClearStatus(LoadProject(ofd.FileName));
+            }
+        }
+        #endregion
+
+
+        
         #region ListView
         private void ResizeListViewColumns(ListView lv)
         {
@@ -246,21 +284,13 @@ namespace PDFUtility
         }
         #endregion
 
+        #region Menu
         private void exitToolStripMenuItem_Click(object sender, EventArgs e)
         {
             Application.Exit();
         }
-
-        private void btnSelectOutput_Click(object sender, EventArgs e)
-        {
-            //GITHUB TEST
-            //SDFSDFK
-            dialogFolderBates.ShowDialog();
-            var folder = dialogFolderBates.SelectedPath;
-            Globals.outputFolder = folder;
-            txtFolderBates.Text = folder;
-            SaveFileStatic.outputFolder = folder;
-        }
+        #endregion
+        
         #region AddFilesAndFolders
         private void btnAddFolderBates_Click(object sender, EventArgs e)
         {
@@ -387,11 +417,7 @@ namespace PDFUtility
             FixFileList();
         }
 
-        private void btnOptions_Click(object sender, EventArgs e)
-        {
-            formOptions form = new formOptions();
-            form.Show();
-        }
+
 
         #region Save and Load
         private void InitializeSaveFile()
@@ -442,28 +468,7 @@ namespace PDFUtility
             return response;
         }
         #endregion
-
-        private void btnSaveProject_Click(object sender, EventArgs e)
-        {
-            SaveFileDialog sfd = new SaveFileDialog();
-            sfd.Filter = "Bates Plus Plus Files|*.bpp";
-            sfd.DefaultExt = ".bpp";
-            if (sfd.ShowDialog() == DialogResult.OK)
-            {
-                ClearStatus(SaveProject(sfd.FileName));
-            }
-        }
-
-        private void btnOpenProject_Click(object sender, EventArgs e)
-        {
-            OpenFileDialog ofd = new OpenFileDialog();
-            ofd.Filter = "Bates Plus Plus Files|*.bpp";
-            ofd.DefaultExt = ".bpp";
-            if (ofd.ShowDialog() == DialogResult.OK)
-            {
-                ClearStatus(LoadProject(ofd.FileName));
-            }
-        }
+        
     }
 
     public partial class PDFUtility
