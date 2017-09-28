@@ -13,6 +13,7 @@ using iTextSharp.text;
 using iTextSharp.text.pdf;
 using System.Collections;
 using Newtonsoft.Json;
+using Microsoft.Office.Interop.Excel;
 
 namespace PDFUtility
 {
@@ -37,85 +38,34 @@ namespace PDFUtility
 
     public partial class formMain : Form
     {
+        #region Form
         public formMain()
         {
             InitializeComponent();
-            Globals.appName = "PDF Utility";
+            Globals.appName = "Bates Plus";
             InitializeListView();
             this.lstBatesFiles.DragDrop += new
                 System.Windows.Forms.DragEventHandler(this.lstBatesFiles_DragDrop);
             this.lstBatesFiles.DragEnter += new
                 System.Windows.Forms.DragEventHandler(this.lstBatesFiles_DragEnter);
             ResizeListViewColumns(lstBatesFiles);
-            btnAddFilesBates2.Visible = false;
-            btnSelectFolderBates.Visible = false;
+            //btnAddFilesBates2.Visible = false;
+            //btnSelectFolderBates.Visible = false;
             chkSubfolders.Visible = false;
             this.Text = Globals.appName + " - " + Globals.currentProject;
             txtFolderBates.Text = Globals.outputFolder;
             InitializeSaveFile();
         }
+        #endregion
 
-        private void folderBrowserDialog1_HelpRequest(object sender, EventArgs e)
-        {
-
-        }
-
-        private void btnSelectFolderBates_Click(object sender, EventArgs e)
-        {
-            dialogFolderBates.ShowDialog();
-            var folder = dialogFolderBates.SelectedPath;
-            Globals.folderToStamp = folder;
-            txtFolderBates.Text = folder;
-        }
-
-        private void btnAddFilesBates2_Click(object sender, EventArgs e)
-        {
-            dialogFileBates.ShowDialog();
-            var files = dialogFileBates.FileNames;
-
-        }
-
-        private void btnBatesStamp_Click(object sender, EventArgs e)
-        {
-            PDFUtility pu = new PDFUtility();
-            int startNumber;
-            string fullPath = "";
-            string[] files;
-            string batesPrefix = txtBatesPrefix.Text;
-            List<string> fileCollection = new List<string>();
-            //myCollection.Add(aString);
-            for (int i = 0; i < lstBatesFiles.Items.Count; i++)
-            {
-                fullPath = lstBatesFiles.Items[i].SubItems[4].Text + @"\" + lstBatesFiles.Items[i].SubItems[1].Text;
-                fileCollection.Add(fullPath);
-            }
-            files = fileCollection.ToArray();
-            if (int.TryParse(txtStartNumber.Text, out startNumber))
-            {
-                // it's a valid integer
-                pu.BatesStamp(files,startNumber,batesPrefix);
-                txtStartNumber.Text = Globals.currentBates.ToString();
-            }
-            else
-            {
-                MessageBox.Show("Please enter a valid number in the Start At field.", Globals.appName, MessageBoxButtons.OK, MessageBoxIcon.Asterisk);
-            }
-        }
-        #region ListView
-        private void ResizeListViewColumns(ListView lv)
-        {
-            foreach (ColumnHeader column in lv.Columns)
-            {
-                column.Width = -2;
-            }
-        }
+        #region Helper Functions
         private void FixFileList()
         {
             int fileNum = 1;
             int startingBates = 1;
             int endingBates;
             int numPages;
-            if (int.TryParse(txtStartNumber.Text, out startingBates)) {} //Puts int value of text from start number field in startingBates
+            if (int.TryParse(txtStartNumber.Text, out startingBates)) { } //Puts int value of text from start number field in startingBates
             else
             { //if empty string or non-int make everything 1, which is default
                 startingBates = 1;
@@ -146,6 +96,153 @@ namespace PDFUtility
             }
             ResizeListViewColumns(lstBatesFiles);
         }
+        private void ExportToExcel(ListView lv)
+        {
+            using (SaveFileDialog sfd = new SaveFileDialog() { Filter = "Excel Workbook|*.xlsx", ValidateNames = true })
+            {
+                if (sfd.ShowDialog() == DialogResult.OK)
+                {
+                    Microsoft.Office.Interop.Excel.Application app = new Microsoft.Office.Interop.Excel.Application();
+                    Workbook wb = app.Workbooks.Add(XlSheetType.xlWorksheet);
+                    Worksheet ws = (Worksheet)app.ActiveSheet;
+                    app.Visible = false;
+                    for (int j = 1; j <= lv.Columns.Count; j++)
+                    {
+                        var newWidth = Math.Min(255, lv.Columns[j - 1].Width / 2);
+                        ws.Columns[j].ColumnWidth = newWidth;
+                        ws.Cells[1, j] = lv.Columns[j - 1].Text;
+                    }
+                    int i = 2;
+                    foreach (ListViewItem item in lv.Items)
+                    {
+                        for (int k = 1; k <= item.SubItems.Count; k++)
+                        {
+                            ws.Cells[i, k] = item.SubItems[k - 1].Text;
+                        }
+                        i++;
+                    }
+                    wb.SaveAs(sfd.FileName, XlFileFormat.xlWorkbookDefault, Type.Missing, Type.Missing, false, false, XlSaveAsAccessMode.xlNoChange, XlSaveConflictResolution.xlLocalSessionChanges, Type.Missing, Type.Missing);
+                    app.Quit();
+                    MessageBox.Show("Exported Successfully.");
+                }
+            }
+        }
+        #endregion
+
+        #region Buttons (Other than Menu)
+        private void btnSelectOutput_Click(object sender, EventArgs e)
+        {
+            dialogFolderBates.ShowDialog();
+            var folder = dialogFolderBates.SelectedPath;
+            Globals.outputFolder = folder;
+            txtFolderBates.Text = folder;
+            SaveFileStatic.outputFolder = folder;
+        }
+
+        private void btnExportExcel_Click(object sender, EventArgs e)
+        {
+            ExportToExcel(lstBatesFiles);
+        }
+
+        private void btnBatesStamp_Click(object sender, EventArgs e)
+        {
+            PDFUtility pu = new PDFUtility();
+            int startNumber;
+            string fullPath = "";
+            string[] files;
+            string batesPrefix = txtBatesPrefix.Text;
+            List<string> fileCollection = new List<string>();
+            //myCollection.Add(aString);
+            for (int i = 0; i < lstBatesFiles.Items.Count; i++)
+            {
+                fullPath = lstBatesFiles.Items[i].SubItems[4].Text + @"\" + lstBatesFiles.Items[i].SubItems[1].Text;
+                fileCollection.Add(fullPath);
+            }
+            files = fileCollection.ToArray();
+            if (int.TryParse(txtStartNumber.Text, out startNumber))
+            {
+                // it's a valid integer
+                pu.BatesStamp(files, startNumber, batesPrefix);
+                txtStartNumber.Text = Globals.currentBates.ToString();
+            }
+            else
+            {
+                MessageBox.Show("Please enter a valid number in the Start At field.", Globals.appName, MessageBoxButtons.OK, MessageBoxIcon.Asterisk);
+            }
+        }
+        #endregion
+
+        #region Main Menu Buttons
+        private void btnOpenProject_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog ofd = new OpenFileDialog();
+            ofd.Filter = "Bates Plus Plus Files|*.bpp";
+            ofd.DefaultExt = ".bpp";
+            if (ofd.ShowDialog() == DialogResult.OK)
+            {
+                ClearStatus(LoadProject(ofd.FileName));
+            }
+        }
+
+        private void btnSaveProject_Click(object sender, EventArgs e)
+        {
+            SaveFileDialog sfd = new SaveFileDialog();
+            sfd.Filter = "Bates Plus Files|*.bpp";
+            sfd.DefaultExt = ".bpp";
+            if (sfd.ShowDialog() == DialogResult.OK)
+            {
+                ClearStatus(SaveProject(sfd.FileName));
+            }
+        }
+
+        private void btnAddFilesBates_Click_1(object sender, EventArgs e)
+        {
+            if (dialogFileBates.ShowDialog() == DialogResult.OK)
+            {
+                string[] files = dialogFileBates.FileNames;
+                AddFiles(files);
+            }
+        }
+
+        private void btnAddFolderBates_Click(object sender, EventArgs e)
+        {
+            if (dialogFolderBates.ShowDialog() == DialogResult.OK)
+            {
+                var folder = dialogFolderBates.SelectedPath;
+                bool includeSubfolders = false;
+                Globals.folderToStamp = folder;
+                if (System.IO.Directory.GetDirectories(folder).Length > 0)
+                {
+                    string message = "Include subfolders?";
+                    string caption = Globals.appName;
+                    MessageBoxButtons buttons = MessageBoxButtons.YesNo;
+                    DialogResult result;
+                    result = MessageBox.Show(message, caption, buttons);
+                    if (result == System.Windows.Forms.DialogResult.Yes)
+                    {
+                        includeSubfolders = true;
+                    }
+                }
+                AddFolder(folder, includeSubfolders);
+            }
+        }
+
+        private void btnOptions_Click(object sender, EventArgs e)
+        {
+            PDFUtilityOptions.formOptions form = new PDFUtilityOptions.formOptions();
+            form.Show();
+        }
+        #endregion
+
+        #region ListView
+        private void ResizeListViewColumns(ListView lv)
+        {
+            foreach (ColumnHeader column in lv.Columns)
+            {
+                column.Width = -2;
+            }
+        }
+        
         private void lstBatesFiles_DragEnter(object sender, System.Windows.Forms.DragEventArgs e)
         {
             if (e.Data.GetDataPresent(DataFormats.FileDrop))
@@ -153,6 +250,7 @@ namespace PDFUtility
             else
                 e.Effect = DragDropEffects.Link;
         }
+
         private void lstBatesFiles_DragDrop(object sender, System.Windows.Forms.DragEventArgs e)
         {
             //MessageBox.Show(lstBatesFiles.InsertionMark.Index.ToString());
@@ -165,8 +263,8 @@ namespace PDFUtility
                 //Reorder logic
                 //MessageBox.Show(e.Data.ToString());
                 var indexOfItemUnderMouseToDrop = -1;
-                if(lstBatesFiles.HitTest(lstBatesFiles.PointToClient(new Point(e.X, e.Y))).Item != null)
-                    indexOfItemUnderMouseToDrop = lstBatesFiles.HitTest(lstBatesFiles.PointToClient(new Point(e.X, e.Y))).Item.Index;
+                if(lstBatesFiles.HitTest(lstBatesFiles.PointToClient(new System.Drawing.Point(e.X, e.Y))).Item != null)
+                    indexOfItemUnderMouseToDrop = lstBatesFiles.HitTest(lstBatesFiles.PointToClient(new System.Drawing.Point(e.X, e.Y))).Item.Index;
 
                 // Updates the label text.
                 if (indexOfItemUnderMouseToDrop != -1)
@@ -209,30 +307,31 @@ namespace PDFUtility
             }
             FixFileList();
         }
+
         public void InitializeListView()
         {
             lstBatesFiles.View = View.Details;
             lstBatesFiles.FullRowSelect = true;
         }  
+
         private void lstBatesFiles_MouseDown(object sender, MouseEventArgs e)
         {
             int startNum;
             startNum = this.lstBatesFiles.InsertionMark.Index;
             //MessageBox.Show(startNum.ToString());
         }
-        private void lstBatesFiles_MouseUp(object sender, MouseEventArgs e)
-        {
 
-        }
         private void lstBatesFiles_ItemDrag(object sender, ItemDragEventArgs e)
         {
             DoDragDrop(e.Item, DragDropEffects.Link);
         }
+
         public void ClearList()
         {
             lstBatesFiles.Items.Clear();
             FixFileList();
         }
+
         private void lstBatesFiles_KeyUp(object sender, KeyEventArgs e)
         {
             if (e.KeyCode == Keys.Delete)
@@ -246,53 +345,14 @@ namespace PDFUtility
         }
         #endregion
 
+        #region Tool Strip Menu
         private void exitToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            Application.Exit();
+            System.Windows.Forms.Application.Exit();
         }
+        #endregion
 
-        private void btnSelectOutput_Click(object sender, EventArgs e)
-        {
-            //GITHUB TEST
-            //SDFSDFK
-            dialogFolderBates.ShowDialog();
-            var folder = dialogFolderBates.SelectedPath;
-            Globals.outputFolder = folder;
-            txtFolderBates.Text = folder;
-            SaveFileStatic.outputFolder = folder;
-        }
-        #region AddFilesAndFolders
-        private void btnAddFolderBates_Click(object sender, EventArgs e)
-        {
-            if (dialogFolderBates.ShowDialog() == DialogResult.OK)
-            {
-                var folder = dialogFolderBates.SelectedPath;
-                bool includeSubfolders = false;
-                Globals.folderToStamp = folder;
-                if (System.IO.Directory.GetDirectories(folder).Length > 0)
-                {
-                    string message = "Include subfolders?";
-                    string caption = Globals.appName;
-                    MessageBoxButtons buttons = MessageBoxButtons.YesNo;
-                    DialogResult result;
-                    result = MessageBox.Show(message, caption, buttons);
-                    if (result == System.Windows.Forms.DialogResult.Yes)
-                    {
-                        includeSubfolders = true;
-                    }
-                }
-                AddFolder(folder, includeSubfolders);
-            }
-        }
-
-        private void btnAddFilesBates_Click_1(object sender, EventArgs e)
-        {
-            if (dialogFileBates.ShowDialog() == DialogResult.OK)
-            {
-                string[] files = dialogFileBates.FileNames;
-                AddFiles(files);
-            }
-        }
+        #region AddFilesAndFolders        
         public void AddFolder(string folderPath, bool includeSubfolders)
         {
             lblEmptyList.Visible = false;
@@ -326,6 +386,7 @@ namespace PDFUtility
             FixFileList();
             ClearStatus("Click Bates Stamp to stamp these files.");
         }
+
         public void AddFiles(string[] files)
         {
             string path;
@@ -366,32 +427,28 @@ namespace PDFUtility
             {
                 statusTextBates.Text = "Stamping File " + currentAction + " of " + totalActions + ".";
             }
-            Application.DoEvents();
+            System.Windows.Forms.Application.DoEvents();
         }
         public void ClearStatus(string newMessage)
         {
             progBarBates.Value = 0;
             statusTextBates.Text = newMessage;
-            Application.DoEvents();
+            System.Windows.Forms.Application.DoEvents();
         }
         public void ClearStatus()
         {
             progBarBates.Value = 0;
             statusTextBates.Text = "";
-            Application.DoEvents();
+            System.Windows.Forms.Application.DoEvents();
         }
         #endregion
 
+        #region Change Events
         private void txtStartNumber_TextChanged(object sender, EventArgs e)
         {
             FixFileList();
         }
-
-        private void btnOptions_Click(object sender, EventArgs e)
-        {
-            PDFUtilityOptions.formOptions form = new PDFUtilityOptions.formOptions();
-            form.Show();
-        }
+        #endregion
 
         #region Save and Load
         private void InitializeSaveFile()
@@ -443,31 +500,15 @@ namespace PDFUtility
         }
         #endregion
 
-        private void btnSaveProject_Click(object sender, EventArgs e)
+        private void nEwToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            SaveFileDialog sfd = new SaveFileDialog();
-            sfd.Filter = "Bates Plus Plus Files|*.bpp";
-            sfd.DefaultExt = ".bpp";
-            if (sfd.ShowDialog() == DialogResult.OK)
-            {
-                ClearStatus(SaveProject(sfd.FileName));
-            }
-        }
-
-        private void btnOpenProject_Click(object sender, EventArgs e)
-        {
-            OpenFileDialog ofd = new OpenFileDialog();
-            ofd.Filter = "Bates Plus Plus Files|*.bpp";
-            ofd.DefaultExt = ".bpp";
-            if (ofd.ShowDialog() == DialogResult.OK)
-            {
-                ClearStatus(LoadProject(ofd.FileName));
-            }
+            MessageBox.Show("SDF");
         }
     }
 
     public partial class PDFUtility
     {
+        #region Helper Functions
         public int PageCount(string pdfFile)
         {
             int pageCount = 0;
@@ -480,7 +521,9 @@ namespace PDFUtility
             }
             return pageCount;
         }
+        #endregion
 
+        #region Main Logic
         public void BatesStamp(string[] files, int startNumber, string batesPrefix)
         {
             string outputFolder = Globals.outputFolder;
@@ -489,7 +532,7 @@ namespace PDFUtility
             string outputPath = "";
             int currentBates = startNumber;
             formMain form1 = new formMain();
-            form1 = (formMain)Application.OpenForms[0];
+            form1 = (formMain)System.Windows.Forms.Application.OpenForms[0];
             if (Directory.Exists(outputFolder))
             {
                 for (int i = 0; i < files.Length; i++)
@@ -608,6 +651,7 @@ namespace PDFUtility
                 //Create or warn not sure yet
             }
         }
+        #endregion
 
     } //End Class PdfUtility
 
@@ -745,8 +789,7 @@ namespace PDFUtility
             set { _history = value; }
         }
     }
-
-
+    
     static class Globals
     {
         private static string _folderToStamp = "";

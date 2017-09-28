@@ -40,6 +40,8 @@
             this.lblTransparencyNumber = new System.Windows.Forms.Label();
             this.btnOK = new System.Windows.Forms.Button();
             this.btnCancel = new System.Windows.Forms.Button();
+            this.chkSmartStamp = new System.Windows.Forms.CheckBox();
+            this.lblSmartStamp = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.trackTransparency)).BeginInit();
             this.SuspendLayout();
             // 
@@ -67,7 +69,7 @@
             this.trackTransparency.Location = new System.Drawing.Point(351, 245);
             this.trackTransparency.Maximum = 100;
             this.trackTransparency.Name = "trackTransparency";
-            this.trackTransparency.Size = new System.Drawing.Size(215, 42);
+            this.trackTransparency.Size = new System.Drawing.Size(215, 45);
             this.trackTransparency.TabIndex = 2;
             this.trackTransparency.TickFrequency = 10;
             this.trackTransparency.TickStyle = System.Windows.Forms.TickStyle.TopLeft;
@@ -147,12 +149,35 @@
             this.btnCancel.UseVisualStyleBackColor = true;
             this.btnCancel.Click += new System.EventHandler(this.btnCancel_Click);
             // 
+            // chkSmartStamp
+            // 
+            this.chkSmartStamp.AutoSize = true;
+            this.chkSmartStamp.Location = new System.Drawing.Point(132, 289);
+            this.chkSmartStamp.Name = "chkSmartStamp";
+            this.chkSmartStamp.Size = new System.Drawing.Size(122, 17);
+            this.chkSmartStamp.TabIndex = 10;
+            this.chkSmartStamp.Text = "Enable Smart Stamp";
+            this.chkSmartStamp.UseVisualStyleBackColor = true;
+            // 
+            // lblSmartStamp
+            // 
+            this.lblSmartStamp.AutoSize = true;
+            this.lblSmartStamp.Location = new System.Drawing.Point(129, 319);
+            this.lblSmartStamp.MaximumSize = new System.Drawing.Size(250, 0);
+            this.lblSmartStamp.Name = "lblSmartStamp";
+            this.lblSmartStamp.Size = new System.Drawing.Size(231, 39);
+            this.lblSmartStamp.TabIndex = 11;
+            this.lblSmartStamp.Text = "Smart Stamp ensures you don\'t stamp over any content by creating a border around " +
+    "existing content and placing the stamp in that border.";
+            // 
             // formOptions
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.SystemColors.MenuBar;
             this.ClientSize = new System.Drawing.Size(701, 418);
+            this.Controls.Add(this.lblSmartStamp);
+            this.Controls.Add(this.chkSmartStamp);
             this.Controls.Add(this.btnCancel);
             this.Controls.Add(this.btnOK);
             this.Controls.Add(this.lblTransparencyNumber);
@@ -186,5 +211,7 @@
         private System.Windows.Forms.Label lblTransparencyNumber;
         private System.Windows.Forms.Button btnOK;
         private System.Windows.Forms.Button btnCancel;
+        private System.Windows.Forms.CheckBox chkSmartStamp;
+        private System.Windows.Forms.Label lblSmartStamp;
     }
 }

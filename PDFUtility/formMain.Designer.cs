@@ -29,7 +29,6 @@
         private void InitializeComponent()
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(formMain));
-            this.btnAddFilesBates2 = new System.Windows.Forms.Button();
             this.lblEmptyList = new System.Windows.Forms.Label();
             this.lstBatesFiles = new System.Windows.Forms.ListView();
             this.columnHeader1 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
@@ -43,13 +42,17 @@
             this.chkSubfolders = new System.Windows.Forms.CheckBox();
             this.btnBatesStamp = new System.Windows.Forms.Button();
             this.txtBatesPrefix = new System.Windows.Forms.TextBox();
-            this.btnSelectFolderBates = new System.Windows.Forms.Button();
             this.lblFolderBates = new System.Windows.Forms.Label();
             this.txtFolderBates = new System.Windows.Forms.TextBox();
             this.dialogFolderBates = new System.Windows.Forms.FolderBrowserDialog();
             this.dialogFileBates = new System.Windows.Forms.OpenFileDialog();
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.newToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.openToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.saveToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.saveAsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.recentToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.exitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.aboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -66,21 +69,13 @@
             this.progBarBates = new System.Windows.Forms.ToolStripProgressBar();
             this.statusTextBates = new System.Windows.Forms.ToolStripStatusLabel();
             this.btnSelectOutput = new System.Windows.Forms.Button();
+            this.btnExportExcel = new System.Windows.Forms.Button();
+            this.aboutBatesPlusToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.showHelpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.toolStrip1.SuspendLayout();
             this.statusStrip1.SuspendLayout();
             this.SuspendLayout();
-            // 
-            // btnAddFilesBates2
-            // 
-            this.btnAddFilesBates2.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
-            this.btnAddFilesBates2.Location = new System.Drawing.Point(522, 161);
-            this.btnAddFilesBates2.Name = "btnAddFilesBates2";
-            this.btnAddFilesBates2.Size = new System.Drawing.Size(122, 23);
-            this.btnAddFilesBates2.TabIndex = 12;
-            this.btnAddFilesBates2.Text = "Add Files";
-            this.btnAddFilesBates2.UseVisualStyleBackColor = true;
-            this.btnAddFilesBates2.Click += new System.EventHandler(this.btnAddFilesBates2_Click);
             // 
             // lblEmptyList
             // 
@@ -109,11 +104,11 @@
             this.lstBatesFiles.Name = "lstBatesFiles";
             this.lstBatesFiles.Size = new System.Drawing.Size(1007, 241);
             this.lstBatesFiles.TabIndex = 10;
+            this.lstBatesFiles.TabStop = false;
             this.lstBatesFiles.UseCompatibleStateImageBehavior = false;
             this.lstBatesFiles.ItemDrag += new System.Windows.Forms.ItemDragEventHandler(this.lstBatesFiles_ItemDrag);
             this.lstBatesFiles.KeyUp += new System.Windows.Forms.KeyEventHandler(this.lstBatesFiles_KeyUp);
             this.lstBatesFiles.MouseDown += new System.Windows.Forms.MouseEventHandler(this.lstBatesFiles_MouseDown);
-            this.lstBatesFiles.MouseUp += new System.Windows.Forms.MouseEventHandler(this.lstBatesFiles_MouseUp);
             // 
             // columnHeader1
             // 
@@ -153,7 +148,7 @@
             this.txtStartNumber.Location = new System.Drawing.Point(155, 171);
             this.txtStartNumber.Name = "txtStartNumber";
             this.txtStartNumber.Size = new System.Drawing.Size(46, 20);
-            this.txtStartNumber.TabIndex = 2;
+            this.txtStartNumber.TabIndex = 1;
             this.txtStartNumber.Text = "1";
             this.txtStartNumber.TextChanged += new System.EventHandler(this.txtStartNumber_TextChanged);
             // 
@@ -179,11 +174,12 @@
             // btnBatesStamp
             // 
             this.btnBatesStamp.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.btnBatesStamp.Enabled = false;
             this.btnBatesStamp.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
             this.btnBatesStamp.Location = new System.Drawing.Point(897, 469);
             this.btnBatesStamp.Name = "btnBatesStamp";
             this.btnBatesStamp.Size = new System.Drawing.Size(145, 50);
-            this.btnBatesStamp.TabIndex = 3;
+            this.btnBatesStamp.TabIndex = 4;
             this.btnBatesStamp.Text = "Bates Stamp";
             this.btnBatesStamp.UseVisualStyleBackColor = true;
             this.btnBatesStamp.Click += new System.EventHandler(this.btnBatesStamp_Click);
@@ -193,18 +189,7 @@
             this.txtBatesPrefix.Location = new System.Drawing.Point(155, 135);
             this.txtBatesPrefix.Name = "txtBatesPrefix";
             this.txtBatesPrefix.Size = new System.Drawing.Size(285, 20);
-            this.txtBatesPrefix.TabIndex = 1;
-            // 
-            // btnSelectFolderBates
-            // 
-            this.btnSelectFolderBates.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
-            this.btnSelectFolderBates.Location = new System.Drawing.Point(721, 161);
-            this.btnSelectFolderBates.Name = "btnSelectFolderBates";
-            this.btnSelectFolderBates.Size = new System.Drawing.Size(123, 20);
-            this.btnSelectFolderBates.TabIndex = 4;
-            this.btnSelectFolderBates.Text = "Add Folder";
-            this.btnSelectFolderBates.UseVisualStyleBackColor = true;
-            this.btnSelectFolderBates.Click += new System.EventHandler(this.btnSelectFolderBates_Click);
+            this.txtBatesPrefix.TabIndex = 0;
             // 
             // lblFolderBates
             // 
@@ -220,10 +205,8 @@
             this.txtFolderBates.Location = new System.Drawing.Point(155, 94);
             this.txtFolderBates.Name = "txtFolderBates";
             this.txtFolderBates.Size = new System.Drawing.Size(285, 20);
-            this.txtFolderBates.TabIndex = 0;
-            // 
-            // dialogFolderBates
-            // 
+            this.txtFolderBates.TabIndex = 5;
+            this.txtFolderBates.TabStop = false;
             // 
             // dialogFileBates
             // 
@@ -245,27 +228,74 @@
             // fileToolStripMenuItem
             // 
             this.fileToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.newToolStripMenuItem,
+            this.openToolStripMenuItem,
+            this.saveToolStripMenuItem,
+            this.saveAsToolStripMenuItem,
+            this.recentToolStripMenuItem,
             this.exitToolStripMenuItem});
             this.fileToolStripMenuItem.Name = "fileToolStripMenuItem";
             this.fileToolStripMenuItem.Size = new System.Drawing.Size(36, 20);
             this.fileToolStripMenuItem.Text = "File";
             // 
+            // newToolStripMenuItem
+            // 
+            this.newToolStripMenuItem.Image = ((System.Drawing.Image)(resources.GetObject("newToolStripMenuItem.Image")));
+            this.newToolStripMenuItem.Name = "newToolStripMenuItem";
+            this.newToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.N)));
+            this.newToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.newToolStripMenuItem.Text = "New";
+            this.newToolStripMenuItem.Click += new System.EventHandler(this.nEwToolStripMenuItem_Click);
+            // 
+            // openToolStripMenuItem
+            // 
+            this.openToolStripMenuItem.Image = ((System.Drawing.Image)(resources.GetObject("openToolStripMenuItem.Image")));
+            this.openToolStripMenuItem.Name = "openToolStripMenuItem";
+            this.openToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.O)));
+            this.openToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.openToolStripMenuItem.Text = "Open";
+            // 
+            // saveToolStripMenuItem
+            // 
+            this.saveToolStripMenuItem.Image = ((System.Drawing.Image)(resources.GetObject("saveToolStripMenuItem.Image")));
+            this.saveToolStripMenuItem.Name = "saveToolStripMenuItem";
+            this.saveToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.S)));
+            this.saveToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.saveToolStripMenuItem.Text = "Save";
+            // 
+            // saveAsToolStripMenuItem
+            // 
+            this.saveAsToolStripMenuItem.Image = ((System.Drawing.Image)(resources.GetObject("saveAsToolStripMenuItem.Image")));
+            this.saveAsToolStripMenuItem.Name = "saveAsToolStripMenuItem";
+            this.saveAsToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.saveAsToolStripMenuItem.Text = "Save As";
+            // 
+            // recentToolStripMenuItem
+            // 
+            this.recentToolStripMenuItem.Name = "recentToolStripMenuItem";
+            this.recentToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.recentToolStripMenuItem.Text = "Recent";
+            // 
             // exitToolStripMenuItem
             // 
-            this.exitToolStripMenuItem.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.exitToolStripMenuItem.Image = ((System.Drawing.Image)(resources.GetObject("exitToolStripMenuItem.Image")));
             this.exitToolStripMenuItem.Name = "exitToolStripMenuItem";
-            this.exitToolStripMenuItem.Size = new System.Drawing.Size(94, 22);
+            this.exitToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.exitToolStripMenuItem.Text = "Exit";
             this.exitToolStripMenuItem.Click += new System.EventHandler(this.exitToolStripMenuItem_Click);
             // 
             // aboutToolStripMenuItem
             // 
+            this.aboutToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.aboutBatesPlusToolStripMenuItem});
             this.aboutToolStripMenuItem.Name = "aboutToolStripMenuItem";
             this.aboutToolStripMenuItem.Size = new System.Drawing.Size(53, 20);
             this.aboutToolStripMenuItem.Text = "About";
             // 
             // helpToolStripMenuItem
             // 
+            this.helpToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.showHelpToolStripMenuItem});
             this.helpToolStripMenuItem.Name = "helpToolStripMenuItem";
             this.helpToolStripMenuItem.Size = new System.Drawing.Size(43, 20);
             this.helpToolStripMenuItem.Text = "Help";
@@ -287,7 +317,8 @@
             this.toolStrip1.Location = new System.Drawing.Point(0, 24);
             this.toolStrip1.Name = "toolStrip1";
             this.toolStrip1.Size = new System.Drawing.Size(1090, 23);
-            this.toolStrip1.TabIndex = 13;
+            this.toolStrip1.TabIndex = 5;
+            this.toolStrip1.TabStop = true;
             this.toolStrip1.Text = "toolStrip1";
             // 
             // btnNewProject
@@ -383,13 +414,41 @@
             // 
             // btnSelectOutput
             // 
+            this.btnSelectOutput.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
             this.btnSelectOutput.Location = new System.Drawing.Point(468, 92);
             this.btnSelectOutput.Name = "btnSelectOutput";
-            this.btnSelectOutput.Size = new System.Drawing.Size(176, 21);
-            this.btnSelectOutput.TabIndex = 15;
+            this.btnSelectOutput.Size = new System.Drawing.Size(176, 22);
+            this.btnSelectOutput.TabIndex = 2;
             this.btnSelectOutput.Text = "Select Output Folder";
             this.btnSelectOutput.UseVisualStyleBackColor = true;
             this.btnSelectOutput.Click += new System.EventHandler(this.btnSelectOutput_Click);
+            // 
+            // btnExportExcel
+            // 
+            this.btnExportExcel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.btnExportExcel.Enabled = false;
+            this.btnExportExcel.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
+            this.btnExportExcel.Location = new System.Drawing.Point(35, 470);
+            this.btnExportExcel.Name = "btnExportExcel";
+            this.btnExportExcel.Size = new System.Drawing.Size(130, 49);
+            this.btnExportExcel.TabIndex = 3;
+            this.btnExportExcel.Text = "Export to Excel";
+            this.btnExportExcel.UseVisualStyleBackColor = true;
+            this.btnExportExcel.Click += new System.EventHandler(this.btnExportExcel_Click);
+            // 
+            // aboutBatesPlusToolStripMenuItem
+            // 
+            this.aboutBatesPlusToolStripMenuItem.Image = ((System.Drawing.Image)(resources.GetObject("aboutBatesPlusToolStripMenuItem.Image")));
+            this.aboutBatesPlusToolStripMenuItem.Name = "aboutBatesPlusToolStripMenuItem";
+            this.aboutBatesPlusToolStripMenuItem.Size = new System.Drawing.Size(167, 22);
+            this.aboutBatesPlusToolStripMenuItem.Text = "About Bates Plus";
+            // 
+            // showHelpToolStripMenuItem
+            // 
+            this.showHelpToolStripMenuItem.Image = ((System.Drawing.Image)(resources.GetObject("showHelpToolStripMenuItem.Image")));
+            this.showHelpToolStripMenuItem.Name = "showHelpToolStripMenuItem";
+            this.showHelpToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.showHelpToolStripMenuItem.Text = "Show Help";
             // 
             // formMain
             // 
@@ -397,23 +456,23 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.SystemColors.MenuBar;
             this.ClientSize = new System.Drawing.Size(1090, 550);
+            this.Controls.Add(this.btnExportExcel);
             this.Controls.Add(this.toolStrip1);
             this.Controls.Add(this.btnSelectOutput);
             this.Controls.Add(this.statusStrip1);
             this.Controls.Add(this.btnBatesStamp);
             this.Controls.Add(this.lblEmptyList);
-            this.Controls.Add(this.btnAddFilesBates2);
             this.Controls.Add(this.lstBatesFiles);
             this.Controls.Add(this.chkSubfolders);
             this.Controls.Add(this.lblStartAt);
             this.Controls.Add(this.menuStrip1);
             this.Controls.Add(this.txtStartNumber);
-            this.Controls.Add(this.btnSelectFolderBates);
             this.Controls.Add(this.lblBatesPrefix);
             this.Controls.Add(this.txtFolderBates);
             this.Controls.Add(this.txtBatesPrefix);
             this.Controls.Add(this.lblFolderBates);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
+            this.MinimumSize = new System.Drawing.Size(686, 440);
             this.Name = "formMain";
             this.Text = "PDF Utility";
             this.menuStrip1.ResumeLayout(false);
@@ -429,7 +488,6 @@
 
         #endregion
         private System.Windows.Forms.FolderBrowserDialog dialogFolderBates;
-        private System.Windows.Forms.Button btnSelectFolderBates;
         private System.Windows.Forms.Label lblFolderBates;
         private System.Windows.Forms.TextBox txtFolderBates;
         private System.Windows.Forms.Label lblStartAt;
@@ -445,7 +503,6 @@
         private System.Windows.Forms.ColumnHeader columnHeader4;
         private System.Windows.Forms.ColumnHeader columnHeader5;
         private System.Windows.Forms.Label lblEmptyList;
-        private System.Windows.Forms.Button btnAddFilesBates2;
         private System.Windows.Forms.OpenFileDialog dialogFileBates;
         private System.Windows.Forms.MenuStrip menuStrip1;
         private System.Windows.Forms.ToolStripMenuItem fileToolStripMenuItem;
@@ -465,6 +522,14 @@
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator2;
         private System.Windows.Forms.ToolStripButton btnOptions;
         private System.Windows.Forms.Button btnSelectOutput;
+        private System.Windows.Forms.Button btnExportExcel;
+        private System.Windows.Forms.ToolStripMenuItem newToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem openToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem saveToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem saveAsToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem recentToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem aboutBatesPlusToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem showHelpToolStripMenuItem;
     }
 }
 

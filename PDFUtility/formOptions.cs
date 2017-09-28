@@ -56,7 +56,7 @@ namespace PDFUtilityOptions
                     break;
             }
             transparency = Globals.stampTransparency;
-            MessageBox.Show((transparency * 100).ToString());
+            //MessageBox.Show((transparency * 100).ToString());
             trackTransparency.Value = Convert.ToInt32(transparency * 100);
         }
         public formOptions()
