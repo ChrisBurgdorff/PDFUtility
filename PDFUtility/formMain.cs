@@ -504,6 +504,12 @@ namespace PDFUtility
         {
             MessageBox.Show("SDF");
         }
+
+        private void aboutBatesPlusToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            formAbout form = new formAbout();
+            form.Show();
+        }
     }
 
     public partial class PDFUtility
@@ -573,7 +579,7 @@ namespace PDFUtility
                             fileNameOnly = Path.GetFileName(fileName);
                             outputPath = outputFolder + @"\" + fileNameOnly;
                             var baseFont = BaseFont.CreateFont(BaseFont.HELVETICA_BOLD, BaseFont.CP1252, BaseFont.NOT_EMBEDDED);
-                            iTextSharp.text.Font font = new iTextSharp.text.Font(baseFont, 15);
+                            iTextSharp.text.Font font = new iTextSharp.text.Font(baseFont, 15);                    
                             using (PdfStamper stamper = new PdfStamper(reader, new FileStream(outputPath, FileMode.Create, FileAccess.Write)))
                             {
                                 int pages = reader.NumberOfPages;
@@ -842,6 +848,13 @@ namespace PDFUtility
         {
             get { return _indexSelectedBatesList; }
             set { _indexSelectedBatesList = value; }
+        }
+
+        private static iTextSharp.text.Font _font;
+        public static iTextSharp.text.Font font
+        {
+            get { return _font; }
+            set { _font = value; }
         }
     }
 }

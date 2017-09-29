@@ -31,6 +31,7 @@
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(formOptions));
             this.dialogFontBates = new System.Windows.Forms.FontDialog();
             this.pnlLocation = new System.Windows.Forms.Panel();
+            this.batesExample = new PDFUtility.TransLabel();
             this.btnSelectFont = new System.Windows.Forms.Button();
             this.trackTransparency = new System.Windows.Forms.TrackBar();
             this.lblSampleText = new System.Windows.Forms.Label();
@@ -42,31 +43,54 @@
             this.btnCancel = new System.Windows.Forms.Button();
             this.chkSmartStamp = new System.Windows.Forms.CheckBox();
             this.lblSmartStamp = new System.Windows.Forms.Label();
+            this.comboBoxFont = new System.Windows.Forms.ComboBox();
+            this.lblFont = new System.Windows.Forms.Label();
+            this.chkBold = new System.Windows.Forms.CheckBox();
+            this.chkItalic = new System.Windows.Forms.CheckBox();
+            this.btnResetDefault = new System.Windows.Forms.Button();
+            this.comboBoxFontSize = new System.Windows.Forms.ComboBox();
+            this.lblSize = new System.Windows.Forms.Label();
+            this.groupBoxFont = new System.Windows.Forms.GroupBox();
+            this.pnlLocation.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.trackTransparency)).BeginInit();
+            this.groupBoxFont.SuspendLayout();
             this.SuspendLayout();
             // 
             // pnlLocation
             // 
             this.pnlLocation.BackColor = System.Drawing.Color.White;
             this.pnlLocation.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.pnlLocation.Location = new System.Drawing.Point(12, 21);
+            this.pnlLocation.Controls.Add(this.batesExample);
+            this.pnlLocation.Location = new System.Drawing.Point(439, 111);
             this.pnlLocation.Name = "pnlLocation";
-            this.pnlLocation.Size = new System.Drawing.Size(174, 162);
+            this.pnlLocation.Size = new System.Drawing.Size(204, 312);
             this.pnlLocation.TabIndex = 0;
+            // 
+            // batesExample
+            // 
+            this.batesExample.AutoSize = true;
+            this.batesExample.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.batesExample.Location = new System.Drawing.Point(3, 7);
+            this.batesExample.Name = "batesExample";
+            this.batesExample.Size = new System.Drawing.Size(60, 15);
+            this.batesExample.TabIndex = 19;
+            this.batesExample.Text = "BAT 001";
+            this.batesExample.Transparency = 255;
             // 
             // btnSelectFont
             // 
-            this.btnSelectFont.Location = new System.Drawing.Point(378, 97);
+            this.btnSelectFont.Location = new System.Drawing.Point(546, 21);
             this.btnSelectFont.Name = "btnSelectFont";
             this.btnSelectFont.Size = new System.Drawing.Size(133, 50);
             this.btnSelectFont.TabIndex = 1;
             this.btnSelectFont.Text = "Select Font";
             this.btnSelectFont.UseVisualStyleBackColor = true;
+            this.btnSelectFont.Visible = false;
             this.btnSelectFont.Click += new System.EventHandler(this.btnSelectFont_Click);
             // 
             // trackTransparency
             // 
-            this.trackTransparency.Location = new System.Drawing.Point(351, 245);
+            this.trackTransparency.Location = new System.Drawing.Point(41, 258);
             this.trackTransparency.Maximum = 100;
             this.trackTransparency.Name = "trackTransparency";
             this.trackTransparency.Size = new System.Drawing.Size(215, 45);
@@ -79,7 +103,7 @@
             // lblSampleText
             // 
             this.lblSampleText.AutoSize = true;
-            this.lblSampleText.Location = new System.Drawing.Point(311, 188);
+            this.lblSampleText.Location = new System.Drawing.Point(88, 105);
             this.lblSampleText.Name = "lblSampleText";
             this.lblSampleText.Size = new System.Drawing.Size(73, 13);
             this.lblSampleText.TabIndex = 3;
@@ -88,7 +112,7 @@
             // lblTransparency
             // 
             this.lblTransparency.AutoSize = true;
-            this.lblTransparency.Location = new System.Drawing.Point(419, 293);
+            this.lblTransparency.Location = new System.Drawing.Point(109, 306);
             this.lblTransparency.Name = "lblTransparency";
             this.lblTransparency.Size = new System.Drawing.Size(72, 13);
             this.lblTransparency.TabIndex = 4;
@@ -106,34 +130,37 @@
             "Center",
             "Center Bottom",
             "Center Top"});
-            this.comboBoxLocation.Location = new System.Drawing.Point(132, 245);
+            this.comboBoxLocation.Location = new System.Drawing.Point(112, 37);
             this.comboBoxLocation.Name = "comboBoxLocation";
             this.comboBoxLocation.Size = new System.Drawing.Size(150, 21);
             this.comboBoxLocation.TabIndex = 5;
+            this.comboBoxLocation.SelectedIndexChanged += new System.EventHandler(this.comboBoxLocation_SelectedIndexChanged);
             // 
             // lblLocation
             // 
             this.lblLocation.AutoSize = true;
-            this.lblLocation.Location = new System.Drawing.Point(75, 248);
+            this.lblLocation.Location = new System.Drawing.Point(14, 37);
             this.lblLocation.Name = "lblLocation";
-            this.lblLocation.Size = new System.Drawing.Size(51, 13);
+            this.lblLocation.Size = new System.Drawing.Size(84, 13);
             this.lblLocation.TabIndex = 6;
-            this.lblLocation.Text = "Location:";
+            this.lblLocation.Text = "Stamp Location:";
             // 
             // lblTransparencyNumber
             // 
             this.lblTransparencyNumber.AutoSize = true;
-            this.lblTransparencyNumber.Location = new System.Drawing.Point(498, 293);
+            this.lblTransparencyNumber.Location = new System.Drawing.Point(196, 306);
             this.lblTransparencyNumber.Name = "lblTransparencyNumber";
             this.lblTransparencyNumber.Size = new System.Drawing.Size(13, 13);
             this.lblTransparencyNumber.TabIndex = 7;
             this.lblTransparencyNumber.Text = "1";
+            this.lblTransparencyNumber.Visible = false;
             // 
             // btnOK
             // 
-            this.btnOK.Location = new System.Drawing.Point(434, 341);
+            this.btnOK.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
+            this.btnOK.Location = new System.Drawing.Point(497, 507);
             this.btnOK.Name = "btnOK";
-            this.btnOK.Size = new System.Drawing.Size(67, 45);
+            this.btnOK.Size = new System.Drawing.Size(77, 45);
             this.btnOK.TabIndex = 8;
             this.btnOK.Text = "OK";
             this.btnOK.UseVisualStyleBackColor = true;
@@ -141,7 +168,8 @@
             // 
             // btnCancel
             // 
-            this.btnCancel.Location = new System.Drawing.Point(564, 342);
+            this.btnCancel.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
+            this.btnCancel.Location = new System.Drawing.Point(602, 509);
             this.btnCancel.Name = "btnCancel";
             this.btnCancel.Size = new System.Drawing.Size(77, 43);
             this.btnCancel.TabIndex = 9;
@@ -152,7 +180,7 @@
             // chkSmartStamp
             // 
             this.chkSmartStamp.AutoSize = true;
-            this.chkSmartStamp.Location = new System.Drawing.Point(132, 289);
+            this.chkSmartStamp.Location = new System.Drawing.Point(17, 373);
             this.chkSmartStamp.Name = "chkSmartStamp";
             this.chkSmartStamp.Size = new System.Drawing.Size(122, 17);
             this.chkSmartStamp.TabIndex = 10;
@@ -162,37 +190,157 @@
             // lblSmartStamp
             // 
             this.lblSmartStamp.AutoSize = true;
-            this.lblSmartStamp.Location = new System.Drawing.Point(129, 319);
+            this.lblSmartStamp.Location = new System.Drawing.Point(14, 402);
             this.lblSmartStamp.MaximumSize = new System.Drawing.Size(250, 0);
             this.lblSmartStamp.Name = "lblSmartStamp";
             this.lblSmartStamp.Size = new System.Drawing.Size(231, 39);
             this.lblSmartStamp.TabIndex = 11;
             this.lblSmartStamp.Text = "Smart Stamp ensures you don\'t stamp over any content by creating a border around " +
     "existing content and placing the stamp in that border.";
+            this.lblSmartStamp.Click += new System.EventHandler(this.lblSmartStamp_Click);
+            // 
+            // comboBoxFont
+            // 
+            this.comboBoxFont.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.comboBoxFont.FormattingEnabled = true;
+            this.comboBoxFont.Items.AddRange(new object[] {
+            "Courier",
+            "Helvetica",
+            "Times New Roman"});
+            this.comboBoxFont.Location = new System.Drawing.Point(91, 19);
+            this.comboBoxFont.Name = "comboBoxFont";
+            this.comboBoxFont.Size = new System.Drawing.Size(150, 21);
+            this.comboBoxFont.TabIndex = 12;
+            // 
+            // lblFont
+            // 
+            this.lblFont.AutoSize = true;
+            this.lblFont.Location = new System.Drawing.Point(21, 22);
+            this.lblFont.Name = "lblFont";
+            this.lblFont.Size = new System.Drawing.Size(64, 13);
+            this.lblFont.TabIndex = 13;
+            this.lblFont.Text = "Select Font:";
+            // 
+            // chkBold
+            // 
+            this.chkBold.AutoSize = true;
+            this.chkBold.Location = new System.Drawing.Point(91, 51);
+            this.chkBold.Name = "chkBold";
+            this.chkBold.Size = new System.Drawing.Size(47, 17);
+            this.chkBold.TabIndex = 14;
+            this.chkBold.Text = "Bold";
+            this.chkBold.UseVisualStyleBackColor = true;
+            // 
+            // chkItalic
+            // 
+            this.chkItalic.AutoSize = true;
+            this.chkItalic.Location = new System.Drawing.Point(144, 51);
+            this.chkItalic.Name = "chkItalic";
+            this.chkItalic.Size = new System.Drawing.Size(48, 17);
+            this.chkItalic.TabIndex = 15;
+            this.chkItalic.Text = "Italic";
+            this.chkItalic.UseVisualStyleBackColor = true;
+            // 
+            // btnResetDefault
+            // 
+            this.btnResetDefault.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
+            this.btnResetDefault.Location = new System.Drawing.Point(13, 509);
+            this.btnResetDefault.Name = "btnResetDefault";
+            this.btnResetDefault.Size = new System.Drawing.Size(143, 47);
+            this.btnResetDefault.TabIndex = 16;
+            this.btnResetDefault.Text = "Reset to Default";
+            this.btnResetDefault.UseVisualStyleBackColor = true;
+            // 
+            // comboBoxFontSize
+            // 
+            this.comboBoxFontSize.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.comboBoxFontSize.FormattingEnabled = true;
+            this.comboBoxFontSize.Items.AddRange(new object[] {
+            "8",
+            "9",
+            "10",
+            "11",
+            "12",
+            "13",
+            "14",
+            "15",
+            "16",
+            "17",
+            "18",
+            "19",
+            "20",
+            "21",
+            "22",
+            "23",
+            "24",
+            "25",
+            "26",
+            "27",
+            "28",
+            "29",
+            "30",
+            "31",
+            "32"});
+            this.comboBoxFontSize.Location = new System.Drawing.Point(294, 24);
+            this.comboBoxFontSize.Name = "comboBoxFontSize";
+            this.comboBoxFontSize.Size = new System.Drawing.Size(61, 21);
+            this.comboBoxFontSize.TabIndex = 17;
+            // 
+            // lblSize
+            // 
+            this.lblSize.AutoSize = true;
+            this.lblSize.Location = new System.Drawing.Point(258, 27);
+            this.lblSize.Name = "lblSize";
+            this.lblSize.Size = new System.Drawing.Size(30, 13);
+            this.lblSize.TabIndex = 18;
+            this.lblSize.Text = "Size:";
+            // 
+            // groupBoxFont
+            // 
+            this.groupBoxFont.Controls.Add(this.comboBoxFont);
+            this.groupBoxFont.Controls.Add(this.lblSize);
+            this.groupBoxFont.Controls.Add(this.comboBoxFontSize);
+            this.groupBoxFont.Controls.Add(this.lblFont);
+            this.groupBoxFont.Controls.Add(this.chkItalic);
+            this.groupBoxFont.Controls.Add(this.chkBold);
+            this.groupBoxFont.Controls.Add(this.lblSampleText);
+            this.groupBoxFont.Location = new System.Drawing.Point(17, 89);
+            this.groupBoxFont.Name = "groupBoxFont";
+            this.groupBoxFont.Size = new System.Drawing.Size(392, 142);
+            this.groupBoxFont.TabIndex = 19;
+            this.groupBoxFont.TabStop = false;
+            this.groupBoxFont.Text = "Font";
             // 
             // formOptions
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.SystemColors.MenuBar;
-            this.ClientSize = new System.Drawing.Size(701, 418);
+            this.ClientSize = new System.Drawing.Size(703, 580);
+            this.Controls.Add(this.groupBoxFont);
+            this.Controls.Add(this.btnResetDefault);
+            this.Controls.Add(this.comboBoxLocation);
             this.Controls.Add(this.lblSmartStamp);
+            this.Controls.Add(this.lblLocation);
             this.Controls.Add(this.chkSmartStamp);
             this.Controls.Add(this.btnCancel);
             this.Controls.Add(this.btnOK);
             this.Controls.Add(this.lblTransparencyNumber);
-            this.Controls.Add(this.lblLocation);
-            this.Controls.Add(this.comboBoxLocation);
             this.Controls.Add(this.lblTransparency);
-            this.Controls.Add(this.lblSampleText);
             this.Controls.Add(this.trackTransparency);
             this.Controls.Add(this.btnSelectFont);
             this.Controls.Add(this.pnlLocation);
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
+            this.MaximizeBox = false;
             this.Name = "formOptions";
             this.Text = "formOptions";
             this.Load += new System.EventHandler(this.formOptions_Load);
+            this.pnlLocation.ResumeLayout(false);
+            this.pnlLocation.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.trackTransparency)).EndInit();
+            this.groupBoxFont.ResumeLayout(false);
+            this.groupBoxFont.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -213,5 +361,14 @@
         private System.Windows.Forms.Button btnCancel;
         private System.Windows.Forms.CheckBox chkSmartStamp;
         private System.Windows.Forms.Label lblSmartStamp;
+        private System.Windows.Forms.ComboBox comboBoxFont;
+        private System.Windows.Forms.Label lblFont;
+        private System.Windows.Forms.CheckBox chkBold;
+        private System.Windows.Forms.CheckBox chkItalic;
+        private System.Windows.Forms.Button btnResetDefault;
+        private System.Windows.Forms.ComboBox comboBoxFontSize;
+        private System.Windows.Forms.Label lblSize;
+        private System.Windows.Forms.GroupBox groupBoxFont;
+        private PDFUtility.TransLabel batesExample;
     }
 }

@@ -58,6 +58,7 @@ namespace PDFUtilityOptions
             transparency = Globals.stampTransparency;
             //MessageBox.Show((transparency * 100).ToString());
             trackTransparency.Value = Convert.ToInt32(transparency * 100);
+            //SetStampLocation();
         }
         public formOptions()
         {
@@ -72,6 +73,44 @@ namespace PDFUtilityOptions
             trackTransparency.Value = Convert.ToInt32(Globals.stampTransparency * 100);
         }
 
+        private void SetStampLocation()
+        {
+            PDFUtility.Location stampLocation = Globals.stampLocation;
+
+            TransLabel batesExample = new TransLabel();
+            batesExample.Text = "BAT 001";
+            batesExample.Parent = pnlLocation;
+            batesExample.Font = new Font(this.Font, 9f);
+
+
+            batesExample.Show();
+            switch (stampLocation)
+            {
+                case PDFUtility.Location.LOWER_RIGHT:
+                    batesExample.Location = new Point(139, 288);
+                    batesExample.Refresh();
+                    break;
+                case PDFUtility.Location.LOWER_LEFT:
+                    batesExample.Location = new Point(3, 288);
+                    break;
+                case PDFUtility.Location.UPPER_RIGHT:
+                    batesExample.Location = new Point(139, 7);
+                    break;
+                case PDFUtility.Location.UPPER_LEFT:
+                    batesExample.Location = new Point(3, 7);
+                    break;
+                case PDFUtility.Location.CENTER:
+                    batesExample.Location = new Point(74, 146);
+                    break;
+                case PDFUtility.Location.CENTER_BOTTOM:
+                    batesExample.Location = new Point(74, 288);
+                    break;
+                case PDFUtility.Location.CENTER_TOP:
+                    batesExample.Location = new Point(74, 7);
+                    break;
+            }
+        }
+
         private void btnSelectFont_Click(object sender, EventArgs e)
         {
             if (dialogFontBates.ShowDialog() == DialogResult.OK)
@@ -84,10 +123,9 @@ namespace PDFUtilityOptions
         {
             float newTransparency = trackTransparency.Value;
             int alpha = Convert.ToInt32((newTransparency / 100) * 255);
-            //MessageBox.Show(alpha.ToString());
-            //lblSampleText.ForeColor = Color.FromArgb(alpha, Color.Black);
-            //lblSampleText.ForeColor = Color.Blue;
-            lblTransparencyNumber.Text = Math.Round( (newTransparency / 100), 2).ToString();
+            alpha = Math.Min(alpha, 255);
+            alpha = Math.Max(alpha, 0);
+            batesExample.Transparency = alpha;
         }
 
         private void btnCancel_Click(object sender, EventArgs e)
@@ -126,6 +164,16 @@ namespace PDFUtilityOptions
                     break;
             }
             this.Close();
+        }
+
+        private void lblSmartStamp_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void comboBoxLocation_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            SetStampLocation();
         }
     }
 }
