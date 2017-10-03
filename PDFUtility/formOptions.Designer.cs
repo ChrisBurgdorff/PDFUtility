@@ -31,7 +31,6 @@
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(formOptions));
             this.dialogFontBates = new System.Windows.Forms.FontDialog();
             this.pnlLocation = new System.Windows.Forms.Panel();
-            this.batesExample = new PDFUtility.TransLabel();
             this.btnSelectFont = new System.Windows.Forms.Button();
             this.trackTransparency = new System.Windows.Forms.TrackBar();
             this.lblSampleText = new System.Windows.Forms.Label();
@@ -51,7 +50,6 @@
             this.comboBoxFontSize = new System.Windows.Forms.ComboBox();
             this.lblSize = new System.Windows.Forms.Label();
             this.groupBoxFont = new System.Windows.Forms.GroupBox();
-            this.pnlLocation.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.trackTransparency)).BeginInit();
             this.groupBoxFont.SuspendLayout();
             this.SuspendLayout();
@@ -60,22 +58,10 @@
             // 
             this.pnlLocation.BackColor = System.Drawing.Color.White;
             this.pnlLocation.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.pnlLocation.Controls.Add(this.batesExample);
             this.pnlLocation.Location = new System.Drawing.Point(439, 111);
             this.pnlLocation.Name = "pnlLocation";
             this.pnlLocation.Size = new System.Drawing.Size(204, 312);
             this.pnlLocation.TabIndex = 0;
-            // 
-            // batesExample
-            // 
-            this.batesExample.AutoSize = true;
-            this.batesExample.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.batesExample.Location = new System.Drawing.Point(3, 7);
-            this.batesExample.Name = "batesExample";
-            this.batesExample.Size = new System.Drawing.Size(60, 15);
-            this.batesExample.TabIndex = 19;
-            this.batesExample.Text = "BAT 001";
-            this.batesExample.Transparency = 255;
             // 
             // btnSelectFont
             // 
@@ -336,8 +322,6 @@
             this.Name = "formOptions";
             this.Text = "formOptions";
             this.Load += new System.EventHandler(this.formOptions_Load);
-            this.pnlLocation.ResumeLayout(false);
-            this.pnlLocation.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.trackTransparency)).EndInit();
             this.groupBoxFont.ResumeLayout(false);
             this.groupBoxFont.PerformLayout();
@@ -369,6 +353,5 @@
         private System.Windows.Forms.ComboBox comboBoxFontSize;
         private System.Windows.Forms.Label lblSize;
         private System.Windows.Forms.GroupBox groupBoxFont;
-        private PDFUtility.TransLabel batesExample;
     }
 }

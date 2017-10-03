@@ -116,6 +116,7 @@
     <Content Include="Images\addfolder.svg" />
     <Content Include="Images\disk-black.png" />
     <Content Include="Images\document--plus.png" />
+    <Content Include="Images\fakepage.png" />
     <Content Include="Images\file 9.ico" />
     <Content Include="Images\folder--plus.png" />
     <Content Include="Images\folder-open.png" />

@@ -59,6 +59,47 @@ namespace PDFUtilityOptions
             //MessageBox.Show((transparency * 100).ToString());
             trackTransparency.Value = Convert.ToInt32(transparency * 100);
             //SetStampLocation();
+            iTextSharp.text.Font projectFont = Globals.font;
+            switch (projectFont.Family)
+            {
+                case iTextSharp.text.Font.FontFamily.COURIER:
+                    comboBoxFont.SelectedIndex = 0;
+                    break;
+                case iTextSharp.text.Font.FontFamily.HELVETICA:
+                    comboBoxFont.SelectedIndex = 1;
+                    break;
+                case iTextSharp.text.Font.FontFamily.TIMES_ROMAN:
+                    comboBoxFont.SelectedIndex = 2;
+                    break;
+            }
+            switch (projectFont.IsBold())
+            {
+                case false:
+                    chkBold.Checked = false;
+                    break;
+                case true:
+                    chkBold.Checked = true;
+                    break;
+            }
+            switch (projectFont.IsItalic())
+            {
+                case false:
+                    chkItalic.Checked = false;
+                    break;
+                case true:
+                    chkItalic.Checked = true;
+                    break;
+            }
+
+            switch (Globals.smartStamp)
+            {
+                case false:
+                    chkSmartStamp.Checked = false;
+                    break;
+                case true:
+                    chkSmartStamp.Checked = true;
+                    break;
+            }
         }
         public formOptions()
         {
@@ -75,37 +116,52 @@ namespace PDFUtilityOptions
 
         private void SetStampLocation()
         {
-            PDFUtility.Location stampLocation = Globals.stampLocation;
+            //PDFUtility.Location stampLocation = Globals.stampLocation;
+            List<Control> itemsToRemove = new List<Control>();
+            foreach (Control ctrl in pnlLocation.Controls)
+            {
+                if (ctrl.Tag != null && ctrl.Tag.ToString() == "example")
+                {
+                    itemsToRemove.Add(ctrl);
+                }
+            }
+
+            foreach (Control ctrl in itemsToRemove)
+            {
+                Controls.Remove(ctrl);
+                ctrl.Dispose();
+            }
 
             TransLabel batesExample = new TransLabel();
             batesExample.Text = "BAT 001";
             batesExample.Parent = pnlLocation;
-            batesExample.Font = new Font(this.Font, 9f);
-
+            batesExample.Tag = "example";
+            batesExample.Font = new Font("Microsoft Sans Serif", 9, FontStyle.Bold);
+            //batesExample.Font = new Font(this.Font, );
 
             batesExample.Show();
-            switch (stampLocation)
+            switch (comboBoxLocation.SelectedIndex)
             {
-                case PDFUtility.Location.LOWER_RIGHT:
+                case 0:
                     batesExample.Location = new Point(139, 288);
                     batesExample.Refresh();
                     break;
-                case PDFUtility.Location.LOWER_LEFT:
+                case 1:
                     batesExample.Location = new Point(3, 288);
                     break;
-                case PDFUtility.Location.UPPER_RIGHT:
+                case 2:
                     batesExample.Location = new Point(139, 7);
                     break;
-                case PDFUtility.Location.UPPER_LEFT:
+                case 3:
                     batesExample.Location = new Point(3, 7);
                     break;
-                case PDFUtility.Location.CENTER:
+                case 4:
                     batesExample.Location = new Point(74, 146);
                     break;
-                case PDFUtility.Location.CENTER_BOTTOM:
+                case 5:
                     batesExample.Location = new Point(74, 288);
                     break;
-                case PDFUtility.Location.CENTER_TOP:
+                case 6:
                     batesExample.Location = new Point(74, 7);
                     break;
             }
@@ -113,6 +169,7 @@ namespace PDFUtilityOptions
 
         private void btnSelectFont_Click(object sender, EventArgs e)
         {
+            //DEPRECATED
             if (dialogFontBates.ShowDialog() == DialogResult.OK)
             {
                 //set font
@@ -125,7 +182,11 @@ namespace PDFUtilityOptions
             int alpha = Convert.ToInt32((newTransparency / 100) * 255);
             alpha = Math.Min(alpha, 255);
             alpha = Math.Max(alpha, 0);
-            batesExample.Transparency = alpha;
+            //batesExample.Transparency = alpha;
+            foreach (TransLabel label in pnlLocation.Controls)
+            {
+                label.Transparency = alpha;
+            }
         }
 
         private void btnCancel_Click(object sender, EventArgs e)
@@ -163,6 +224,20 @@ namespace PDFUtilityOptions
                     Globals.stampLocation = PDFUtility.Location.CENTER_TOP;
                     break;
             }
+            switch (chkSmartStamp.Checked)
+            {
+                case false:
+                    Globals.smartStamp = false;
+                    break;
+                case true:
+                    Globals.smartStamp = true;
+                    break;
+            }
+            bool bold = chkBold.Checked;
+            bool italic = chkItalic.Checked;
+            //Start here WTF!
+            //iTextSharp.text.Font newFont = new iTextSharp.text.Font(iTextSharp.text.Font.FontFamily.COURIER, 15f, FontStyle.)
+                //Bold = 1, Italic = 2, regular = 0;
             this.Close();
         }
 

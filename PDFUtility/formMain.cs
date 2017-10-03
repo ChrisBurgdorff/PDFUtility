@@ -729,6 +729,13 @@ namespace PDFUtility
             set { _font = value; }
         }
 
+        private static bool _smartStamp;
+        public static bool smartStamp
+        {
+            get { return _smartStamp; }
+            set { _smartStamp = value; }
+        }
+
         private static List<Action> _history;
         public static List<Action> history
         {
@@ -786,6 +793,13 @@ namespace PDFUtility
         {
             get { return _font; }
             set { _font = value; }
+        }
+
+        private static bool _smartStamp;
+        public static bool smartStamp
+        {
+            get { return _smartStamp; }
+            set { _smartStamp = value; }
         }
 
         private List<Action> _history;
@@ -855,6 +869,13 @@ namespace PDFUtility
         {
             get { return _font; }
             set { _font = value; }
+        }
+
+        private static bool _smartStamp = false;
+        public static bool smartStamp
+        {
+            get { return _smartStamp; }
+            set { _smartStamp = value; }
         }
     }
 }
