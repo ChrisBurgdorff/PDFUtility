@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using PDFUtility;
+using iTextSharp.text.pdf;
 
 namespace PDFUtilityOptions
 {
@@ -60,19 +61,19 @@ namespace PDFUtilityOptions
             trackTransparency.Value = Convert.ToInt32(transparency * 100);
             //SetStampLocation();
             iTextSharp.text.Font projectFont = Globals.font;
-            switch (projectFont.Family)
+            switch (projectFont.Familyname)
             {
-                case iTextSharp.text.Font.FontFamily.COURIER:
+                case "Courier":
                     comboBoxFont.SelectedIndex = 0;
                     break;
-                case iTextSharp.text.Font.FontFamily.HELVETICA:
+                case "Helvetica":
                     comboBoxFont.SelectedIndex = 1;
                     break;
-                case iTextSharp.text.Font.FontFamily.TIMES_ROMAN:
+                case "Times":
                     comboBoxFont.SelectedIndex = 2;
                     break;
             }
-            switch (projectFont.IsBold())
+            switch (Globals.bold)
             {
                 case false:
                     chkBold.Checked = false;
@@ -81,7 +82,7 @@ namespace PDFUtilityOptions
                     chkBold.Checked = true;
                     break;
             }
-            switch (projectFont.IsItalic())
+            switch (Globals.italic)
             {
                 case false:
                     chkItalic.Checked = false;
@@ -90,7 +91,15 @@ namespace PDFUtilityOptions
                     chkItalic.Checked = true;
                     break;
             }
-
+            int fontSize = Convert.ToInt32(projectFont.Size);
+            if (fontSize >= 8)
+            {
+                comboBoxFontSize.SelectedIndex = fontSize - 8;
+            }
+            else
+            {
+                comboBoxFontSize.SelectedIndex = 0;
+            }
             switch (Globals.smartStamp)
             {
                 case false:
@@ -165,6 +174,17 @@ namespace PDFUtilityOptions
                     batesExample.Location = new Point(74, 7);
                     break;
             }
+
+            //Reset tranparency
+            float newTransparency = trackTransparency.Value;
+            int alpha = Convert.ToInt32((newTransparency / 100) * 255);
+            alpha = Math.Min(alpha, 255);
+            alpha = Math.Max(alpha, 0);
+            //batesExample.Transparency = alpha;
+            foreach (TransLabel label in pnlLocation.Controls)
+            {
+                label.Transparency = alpha;
+            }
         }
 
         private void btnSelectFont_Click(object sender, EventArgs e)
@@ -236,8 +256,77 @@ namespace PDFUtilityOptions
             bool bold = chkBold.Checked;
             bool italic = chkItalic.Checked;
             //Start here WTF!
-            //iTextSharp.text.Font newFont = new iTextSharp.text.Font(iTextSharp.text.Font.FontFamily.COURIER, 15f, FontStyle.)
-                //Bold = 1, Italic = 2, regular = 0;
+            //iTextSharp.text.Font newFont = new iTextSharp.text.Font(iTextSharp.text.Font.FontFamily., 15f, FontStyle.)
+            //Bold = 1, Italic = 2, regular = 0;
+            int fontSize = comboBoxFontSize.SelectedIndex + 8;
+            iTextSharp.text.pdf.BaseFont baseFont = BaseFont.CreateFont();
+            switch (comboBoxFont.SelectedIndex)
+            {
+                case 0:
+                    //Courier
+                    if (bold && italic)
+                    {
+                        baseFont = BaseFont.CreateFont(BaseFont.COURIER_BOLDOBLIQUE, BaseFont.CP1252, BaseFont.NOT_EMBEDDED);
+                    }
+                    else if (bold)
+                    {
+                        baseFont = BaseFont.CreateFont(BaseFont.COURIER_BOLD, BaseFont.CP1252, BaseFont.NOT_EMBEDDED);
+                    }
+                    else if (italic)
+                    {
+                        baseFont = BaseFont.CreateFont(BaseFont.COURIER_OBLIQUE, BaseFont.CP1252, BaseFont.NOT_EMBEDDED);
+                    }
+                    else
+                    {
+                        baseFont = BaseFont.CreateFont(BaseFont.COURIER, BaseFont.CP1252, BaseFont.NOT_EMBEDDED);
+                    }
+                    break;
+                case 1:
+                    //Helvetica
+                    if (bold && italic)
+                    {
+                        baseFont = BaseFont.CreateFont(BaseFont.HELVETICA_BOLDOBLIQUE, BaseFont.CP1252, BaseFont.NOT_EMBEDDED);
+                    }
+                    else if (bold)
+                    {
+                        baseFont = BaseFont.CreateFont(BaseFont.HELVETICA_BOLD, BaseFont.CP1252, BaseFont.NOT_EMBEDDED);
+                    }
+                    else if (italic)
+                    {
+                        baseFont = BaseFont.CreateFont(BaseFont.HELVETICA_OBLIQUE, BaseFont.CP1252, BaseFont.NOT_EMBEDDED);
+                    }
+                    else
+                    {
+                        baseFont = BaseFont.CreateFont(BaseFont.HELVETICA, BaseFont.CP1252, BaseFont.NOT_EMBEDDED);
+                    }
+                    break;
+                case 2:
+                    //Times New Roman
+                    if (bold && italic)
+                    {
+                        baseFont = BaseFont.CreateFont(BaseFont.TIMES_BOLDITALIC, BaseFont.CP1252, BaseFont.NOT_EMBEDDED);
+                    }
+                    else if (bold)
+                    {
+                        baseFont = BaseFont.CreateFont(BaseFont.TIMES_BOLD, BaseFont.CP1252, BaseFont.NOT_EMBEDDED);
+                    }
+                    else if (italic)
+                    {
+                        baseFont = BaseFont.CreateFont(BaseFont.TIMES_ITALIC, BaseFont.CP1252, BaseFont.NOT_EMBEDDED);
+                    }
+                    else
+                    {
+                        baseFont = BaseFont.CreateFont(BaseFont.TIMES_ROMAN, BaseFont.CP1252, BaseFont.NOT_EMBEDDED);
+                    }
+                    break;
+            }
+            //var base1 = BaseFont.CreateFont();
+            //var baseFont =  BaseFont.CreateFont(BaseFont.HELVETICA_BOLD, BaseFont.CP1252, BaseFont.NOT_EMBEDDED);
+            
+            iTextSharp.text.Font font = new iTextSharp.text.Font(baseFont, fontSize);
+            Globals.font = font;
+            Globals.bold = bold;
+            Globals.italic = italic;
             this.Close();
         }
 
@@ -249,6 +338,79 @@ namespace PDFUtilityOptions
         private void comboBoxLocation_SelectedIndexChanged(object sender, EventArgs e)
         {
             SetStampLocation();
+        }
+
+        private void SetFontStyle()
+        {
+            if (chkBold.Checked && chkItalic.Checked)
+            {
+                lblSampleText.Font = new Font(lblSampleText.Font, FontStyle.Bold | FontStyle.Italic);
+            }
+            else if (chkBold.Checked && !chkItalic.Checked)
+            {
+                lblSampleText.Font = new Font(lblSampleText.Font, FontStyle.Bold);
+            }
+            else if (!chkBold.Checked && chkItalic.Checked)
+            {
+                lblSampleText.Font = new Font(lblSampleText.Font, FontStyle.Italic);
+            }
+            else
+            {
+                lblSampleText.Font = new Font(lblSampleText.Font, FontStyle.Regular);
+            }
+        }
+
+        private void comboBoxFont_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            switch (comboBoxFont.SelectedIndex)
+            {
+                case 0:
+                    lblSampleText.Font = new Font("Courier", comboBoxFontSize.SelectedIndex + 8);
+                    break;
+                case 1:
+                    lblSampleText.Font = new Font("Helvetica", comboBoxFontSize.SelectedIndex + 8);
+                    break;
+                case 2:
+                    lblSampleText.Font = new Font("Times New Roman", comboBoxFontSize.SelectedIndex + 8);
+                    break;
+            }
+        }
+
+        private void comboBoxFontSize_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            switch (comboBoxFont.SelectedIndex)
+            {
+                case 0:
+                    lblSampleText.Font = new Font("Courier", comboBoxFontSize.SelectedIndex + 8);
+                    break;
+                case 1:
+                    lblSampleText.Font = new Font("Helvetica", comboBoxFontSize.SelectedIndex + 8);
+                    break;
+                case 2:
+                    lblSampleText.Font = new Font("Times New Roman", comboBoxFontSize.SelectedIndex + 8);
+                    break;
+            }            
+        }
+
+        private void chkBold_CheckedChanged(object sender, EventArgs e)
+        {
+            SetFontStyle();
+        }
+
+        private void chkItalic_CheckedChanged(object sender, EventArgs e)
+        {
+            SetFontStyle();
+        }
+
+        private void btnResetDefault_Click(object sender, EventArgs e)
+        {
+            comboBoxLocation.SelectedIndex = 0;
+            comboBoxFont.SelectedIndex = 1;
+            comboBoxFontSize.SelectedIndex = 7;
+            chkBold.Checked = true;
+            chkItalic.Checked = false;
+            chkSmartStamp.Checked = false;
+            trackTransparency.Value = 100;
         }
     }
 }

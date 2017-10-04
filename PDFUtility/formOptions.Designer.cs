@@ -31,7 +31,6 @@
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(formOptions));
             this.dialogFontBates = new System.Windows.Forms.FontDialog();
             this.pnlLocation = new System.Windows.Forms.Panel();
-            this.btnSelectFont = new System.Windows.Forms.Button();
             this.trackTransparency = new System.Windows.Forms.TrackBar();
             this.lblSampleText = new System.Windows.Forms.Label();
             this.lblTransparency = new System.Windows.Forms.Label();
@@ -58,21 +57,10 @@
             // 
             this.pnlLocation.BackColor = System.Drawing.Color.White;
             this.pnlLocation.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.pnlLocation.Location = new System.Drawing.Point(439, 111);
+            this.pnlLocation.Location = new System.Drawing.Point(475, 89);
             this.pnlLocation.Name = "pnlLocation";
             this.pnlLocation.Size = new System.Drawing.Size(204, 312);
             this.pnlLocation.TabIndex = 0;
-            // 
-            // btnSelectFont
-            // 
-            this.btnSelectFont.Location = new System.Drawing.Point(546, 21);
-            this.btnSelectFont.Name = "btnSelectFont";
-            this.btnSelectFont.Size = new System.Drawing.Size(133, 50);
-            this.btnSelectFont.TabIndex = 1;
-            this.btnSelectFont.Text = "Select Font";
-            this.btnSelectFont.UseVisualStyleBackColor = true;
-            this.btnSelectFont.Visible = false;
-            this.btnSelectFont.Click += new System.EventHandler(this.btnSelectFont_Click);
             // 
             // trackTransparency
             // 
@@ -89,7 +77,7 @@
             // lblSampleText
             // 
             this.lblSampleText.AutoSize = true;
-            this.lblSampleText.Location = new System.Drawing.Point(88, 105);
+            this.lblSampleText.Location = new System.Drawing.Point(88, 87);
             this.lblSampleText.Name = "lblSampleText";
             this.lblSampleText.Size = new System.Drawing.Size(73, 13);
             this.lblSampleText.TabIndex = 3;
@@ -197,6 +185,7 @@
             this.comboBoxFont.Name = "comboBoxFont";
             this.comboBoxFont.Size = new System.Drawing.Size(150, 21);
             this.comboBoxFont.TabIndex = 12;
+            this.comboBoxFont.SelectedIndexChanged += new System.EventHandler(this.comboBoxFont_SelectedIndexChanged);
             // 
             // lblFont
             // 
@@ -216,6 +205,7 @@
             this.chkBold.TabIndex = 14;
             this.chkBold.Text = "Bold";
             this.chkBold.UseVisualStyleBackColor = true;
+            this.chkBold.CheckedChanged += new System.EventHandler(this.chkBold_CheckedChanged);
             // 
             // chkItalic
             // 
@@ -226,6 +216,7 @@
             this.chkItalic.TabIndex = 15;
             this.chkItalic.Text = "Italic";
             this.chkItalic.UseVisualStyleBackColor = true;
+            this.chkItalic.CheckedChanged += new System.EventHandler(this.chkItalic_CheckedChanged);
             // 
             // btnResetDefault
             // 
@@ -236,6 +227,7 @@
             this.btnResetDefault.TabIndex = 16;
             this.btnResetDefault.Text = "Reset to Default";
             this.btnResetDefault.UseVisualStyleBackColor = true;
+            this.btnResetDefault.Click += new System.EventHandler(this.btnResetDefault_Click);
             // 
             // comboBoxFontSize
             // 
@@ -271,6 +263,7 @@
             this.comboBoxFontSize.Name = "comboBoxFontSize";
             this.comboBoxFontSize.Size = new System.Drawing.Size(61, 21);
             this.comboBoxFontSize.TabIndex = 17;
+            this.comboBoxFontSize.SelectedIndexChanged += new System.EventHandler(this.comboBoxFontSize_SelectedIndexChanged);
             // 
             // lblSize
             // 
@@ -314,7 +307,6 @@
             this.Controls.Add(this.lblTransparencyNumber);
             this.Controls.Add(this.lblTransparency);
             this.Controls.Add(this.trackTransparency);
-            this.Controls.Add(this.btnSelectFont);
             this.Controls.Add(this.pnlLocation);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
@@ -334,7 +326,6 @@
 
         private System.Windows.Forms.FontDialog dialogFontBates;
         private System.Windows.Forms.Panel pnlLocation;
-        private System.Windows.Forms.Button btnSelectFont;
         private System.Windows.Forms.TrackBar trackTransparency;
         private System.Windows.Forms.Label lblSampleText;
         private System.Windows.Forms.Label lblTransparency;

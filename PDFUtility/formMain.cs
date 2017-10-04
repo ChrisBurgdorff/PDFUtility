@@ -59,6 +59,24 @@ namespace PDFUtility
         #endregion
 
         #region Helper Functions
+        private void EmptyList(bool isEmpty)
+        {
+            if (isEmpty)
+            {
+                lblEmptyList.Visible = true;
+                lblEmptyList.Enabled = true;
+                btnBatesStamp.Enabled = false;
+                btnExportExcel.Enabled = false;
+            }
+            else
+            {
+                lblEmptyList.Visible = false;
+                lblEmptyList.Enabled = false;
+                btnBatesStamp.Enabled = true;
+                btnExportExcel.Enabled = true;
+            }
+        }
+
         private void FixFileList()
         {
             int fileNum = 1;
@@ -86,13 +104,15 @@ namespace PDFUtility
             }
             if (lstBatesFiles.Items.Count > 0)
             {
-                lblEmptyList.Visible = false;
-                lblEmptyList.Enabled = false;
+                EmptyList(false);
+                //lblEmptyList.Visible = false;
+                //lblEmptyList.Enabled = false;
             }
             else
             {
-                lblEmptyList.Visible = true;
-                lblEmptyList.Enabled = true;
+                EmptyList(true);
+                //lblEmptyList.Visible = true;
+                //lblEmptyList.Enabled = true;
             }
             ResizeListViewColumns(lstBatesFiles);
         }
@@ -132,11 +152,14 @@ namespace PDFUtility
         #region Buttons (Other than Menu)
         private void btnSelectOutput_Click(object sender, EventArgs e)
         {
-            dialogFolderBates.ShowDialog();
-            var folder = dialogFolderBates.SelectedPath;
-            Globals.outputFolder = folder;
-            txtFolderBates.Text = folder;
-            SaveFileStatic.outputFolder = folder;
+            dialogFolderBates.Description = "Select Output Folder:";
+            if (dialogFolderBates.ShowDialog() == DialogResult.OK)
+            {
+                var folder = dialogFolderBates.SelectedPath;
+                Globals.outputFolder = folder;
+                txtFolderBates.Text = folder;
+                SaveFileStatic.outputFolder = folder;
+            }
         }
 
         private void btnExportExcel_Click(object sender, EventArgs e)
@@ -176,7 +199,7 @@ namespace PDFUtility
         private void btnOpenProject_Click(object sender, EventArgs e)
         {
             OpenFileDialog ofd = new OpenFileDialog();
-            ofd.Filter = "Bates Plus Plus Files|*.bpp";
+            ofd.Filter = "Bates Plus Files|*.bpp";
             ofd.DefaultExt = ".bpp";
             if (ofd.ShowDialog() == DialogResult.OK)
             {
@@ -206,6 +229,7 @@ namespace PDFUtility
 
         private void btnAddFolderBates_Click(object sender, EventArgs e)
         {
+            dialogFolderBates.Description = "Select Folder To Add:";
             if (dialogFolderBates.ShowDialog() == DialogResult.OK)
             {
                 var folder = dialogFolderBates.SelectedPath;
@@ -355,8 +379,9 @@ namespace PDFUtility
         #region AddFilesAndFolders        
         public void AddFolder(string folderPath, bool includeSubfolders)
         {
-            lblEmptyList.Visible = false;
-            lblEmptyList.Enabled = false;
+            
+            //lblEmptyList.Visible = false;
+            //lblEmptyList.Enabled = false;
             string[] files;
             string path;
             string fileName;
@@ -374,6 +399,10 @@ namespace PDFUtility
             IComparer comparer = new AlphanumComparator.AlphanumComparator();
             Array.Sort(files, comparer);
             path = folderPath;
+            if (files.Length > 0)
+            {
+                EmptyList(false);
+            }
             for (int i = 0; i < files.Length; i++)
             {
                 fileName = Path.GetFileName(files[i]);
@@ -396,8 +425,12 @@ namespace PDFUtility
             PDFUtility pu = new PDFUtility();
             IComparer comparer = new AlphanumComparator.AlphanumComparator();
             Array.Sort(files, comparer);
-            lblEmptyList.Visible = false;
-            lblEmptyList.Enabled = false;
+            if (files.Length > 0)
+            {
+                EmptyList(false);
+            }
+            //lblEmptyList.Visible = false;
+            //lblEmptyList.Enabled = false;
             for (int i = 0; i < files.Length; i++)
             {
                 fileName = Path.GetFileName(files[i]);
@@ -462,6 +495,14 @@ namespace PDFUtility
             SaveFileStatic.name = "";
             SaveFileStatic.outputFolder = Globals.outputFolder;
             SaveFileStatic.transparency = 1f;
+            var baseFont = BaseFont.CreateFont(BaseFont.HELVETICA_BOLD, BaseFont.CP1252, BaseFont.NOT_EMBEDDED);
+            if (Globals.font == null)
+            {
+                iTextSharp.text.Font font = new iTextSharp.text.Font(baseFont, 15);
+                SaveFileStatic.font = font;
+                //Fix Later
+                Globals.font = font;
+            }
         }
 
         public string SaveProject(string path)
@@ -548,7 +589,7 @@ namespace PDFUtility
                     form1.UpdateStatus(i+1, files.Length, Activity.BATES_STAMPING);
                     if (Path.GetExtension(fileName) == ".pdf")
                     {
-                        //Smart Stamping
+                        /*/Smart Stamping
                         PdfReader pReader = new PdfReader(fileName);
                         int numPages = pReader.NumberOfPages;
                         Document doc = new Document();
@@ -573,13 +614,14 @@ namespace PDFUtility
                         pReader.Close();
                         pWriter.Close();
                         fileName = outputPath;
-                        //End Smart Stamping
+                        //End Smart Stamping                   */
                         using (var reader = new PdfReader(fileName))
                         {
                             fileNameOnly = Path.GetFileName(fileName);
                             outputPath = outputFolder + @"\" + fileNameOnly;
-                            var baseFont = BaseFont.CreateFont(BaseFont.HELVETICA_BOLD, BaseFont.CP1252, BaseFont.NOT_EMBEDDED);
-                            iTextSharp.text.Font font = new iTextSharp.text.Font(baseFont, 15);                    
+                            //var baseFont = BaseFont.CreateFont(BaseFont.HELVETICA_BOLD, BaseFont.CP1252, BaseFont.NOT_EMBEDDED);
+                            //iTextSharp.text.Font font = new iTextSharp.text.Font(baseFont, 15);     
+                            iTextSharp.text.Font font = Globals.font;
                             using (PdfStamper stamper = new PdfStamper(reader, new FileStream(outputPath, FileMode.Create, FileAccess.Write)))
                             {
                                 int pages = reader.NumberOfPages;
@@ -864,11 +906,27 @@ namespace PDFUtility
             set { _indexSelectedBatesList = value; }
         }
 
+        //var baseFont = BaseFont.CreateFont(BaseFont.HELVETICA_BOLD, BaseFont.CP1252, BaseFont.NOT_EMBEDDED);
+        //iTextSharp.text.Font font = new iTextSharp.text.Font(baseFont, 15);
         private static iTextSharp.text.Font _font;
         public static iTextSharp.text.Font font
         {
             get { return _font; }
             set { _font = value; }
+        }
+
+        private static bool _bold = true;
+        public static bool bold
+        {
+            get { return _bold; }
+            set { _bold = value; }
+        }
+
+        private static bool _italic = false;
+        public static bool italic
+        {
+            get { return _italic; }
+            set { _italic = value; }
         }
 
         private static bool _smartStamp = false;
