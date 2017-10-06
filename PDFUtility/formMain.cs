@@ -87,7 +87,7 @@ namespace PDFUtility
             else
             { //if empty string or non-int make everything 1, which is default
                 startingBates = 1;
-                txtStartNumber.Text = "1";
+                //txtStartNumber.Text = "1";
             }
             for (int i = 0; i < lstBatesFiles.Items.Count; i++)
             {
@@ -143,9 +143,16 @@ namespace PDFUtility
                     }
                     wb.SaveAs(sfd.FileName, XlFileFormat.xlWorkbookDefault, Type.Missing, Type.Missing, false, false, XlSaveAsAccessMode.xlNoChange, XlSaveConflictResolution.xlLocalSessionChanges, Type.Missing, Type.Missing);
                     app.Quit();
-                    MessageBox.Show("Exported Successfully.");
+                    MessageBox.Show("Exported Successfully.", Globals.appName);
                 }
             }
+        }
+        public void UpdateCurrentBatesNumber(int batesNumber, string batesPrefix)
+        {
+            txtStartNumber.Text = batesNumber.ToString();
+            lblLastStamped.Text = "Last Stamped: " + batesPrefix + " " + (batesNumber - 1).ToString();
+            lblLastStamped.Visible = true;
+            lblLastStamped.Enabled = true;
         }
         #endregion
 
@@ -186,7 +193,7 @@ namespace PDFUtility
             {
                 // it's a valid integer
                 pu.BatesStamp(files, startNumber, batesPrefix);
-                txtStartNumber.Text = Globals.currentBates.ToString();
+                //txtStartNumber.Text = Globals.currentBates.ToString();
             }
             else
             {
@@ -578,43 +585,63 @@ namespace PDFUtility
             string fileName;
             string outputPath = "";
             int currentBates = startNumber;
+            bool smartStamp = Globals.smartStamp;
+            string tempFolder = AppDomain.CurrentDomain.BaseDirectory + @"Temp\";
             formMain form1 = new formMain();
             form1 = (formMain)System.Windows.Forms.Application.OpenForms[0];
-            if (Directory.Exists(outputFolder))
+            bool outputGood = false;
+            if (!Directory.Exists(outputFolder))
+            {
+                if (MessageBox.Show("The output folder does not exist.  Do you want to create it?", Globals.appName, MessageBoxButtons.YesNo) == DialogResult.Yes)
+                {
+                    System.IO.Directory.CreateDirectory(outputFolder);
+                    outputGood = true;
+                }
+            }
+            else
+            {
+                outputGood = true;
+            }
+            if (outputGood)
             {
                 for (int i = 0; i < files.Length; i++)
                 {
                     fileName = files[i];
-                    
-                    form1.UpdateStatus(i+1, files.Length, Activity.BATES_STAMPING);
+
+                    form1.UpdateStatus(i + 1, files.Length, Activity.BATES_STAMPING);
                     if (Path.GetExtension(fileName) == ".pdf")
                     {
-                        /*/Smart Stamping
-                        PdfReader pReader = new PdfReader(fileName);
-                        int numPages = pReader.NumberOfPages;
-                        Document doc = new Document();
-                        fileNameOnly = Path.GetFileName(fileName);
-                        outputPath = outputFolder + @"\" + fileNameOnly;
-                        PdfWriter pWriter = PdfWriter.GetInstance(doc, new FileStream(outputPath, FileMode.Create, FileAccess.Write));
-                        doc.Open();
-                        iTextSharp.text.Image img;
-                        PdfImportedPage page;
-                        PdfContentByte directContent = new PdfContentByte(pWriter);
-                        for (int k = 1; k <= numPages; k++)
+                        //Smart Stamping
+                        if (smartStamp)
                         {
-                            page = pWriter.GetImportedPage(pReader, k);
-                            img = iTextSharp.text.Image.GetInstance(page);
-                            img.ScaleAbsolute(PageSize.A4.Width - 72, PageSize.A4.Height - 72);
-                            img.SetAbsolutePosition(36, 36);
-                            directContent.AddImage(img);
-                            doc.Add(img);
-                            doc.NewPage();
+                            PdfReader pReader = new PdfReader(fileName);
+                            int numPages = pReader.NumberOfPages;
+                            Document doc = new Document();
+                            fileNameOnly = Path.GetFileName(fileName);
+                            //outputPath = outputFolder + @"\" + fileNameOnly;                            
+                            System.IO.Directory.CreateDirectory(tempFolder);
+                            string tempPath = tempFolder + fileNameOnly;
+                            PdfWriter pWriter = PdfWriter.GetInstance(doc, new FileStream(tempPath, FileMode.Create, FileAccess.Write));
+                            doc.Open();
+                            iTextSharp.text.Image img;
+                            PdfImportedPage page;
+                            PdfContentByte directContent = new PdfContentByte(pWriter);
+                            for (int k = 1; k <= numPages; k++)
+                            {
+                                page = pWriter.GetImportedPage(pReader, k);
+                                img = iTextSharp.text.Image.GetInstance(page);
+                                img.ScaleAbsolute(PageSize.A4.Width - 72, PageSize.A4.Height - 72);
+                                img.SetAbsolutePosition(36, 36);
+                                directContent.AddImage(img);
+                                doc.Add(img);
+                                doc.NewPage();
+                            }
+                            doc.Close();
+                            pReader.Close();
+                            pWriter.Close();
+                            fileName = tempPath;
                         }
-                        doc.Close();
-                        pReader.Close();
-                        pWriter.Close();
-                        fileName = outputPath;
-                        //End Smart Stamping                   */
+                        //End Smart Stamping                   
                         using (var reader = new PdfReader(fileName))
                         {
                             fileNameOnly = Path.GetFileName(fileName);
@@ -682,7 +709,7 @@ namespace PDFUtility
                                     PdfGState gState = new PdfGState();
                                     gState.FillOpacity = Globals.stampTransparency;
                                     contentByte.SetGState(gState);
-                                    ColumnText.ShowTextAligned(contentByte, alignment, p, printX, printY, 0); 
+                                    ColumnText.ShowTextAligned(contentByte, alignment, p, printX, printY, 0);
                                 }//End For
                             }//End using
                             reader.Close();
@@ -691,12 +718,16 @@ namespace PDFUtility
                 }//End For
                 form1.ClearStatus(files.Length + " Files Stamped to " + Path.GetDirectoryName(outputPath) + @"\");
                 form1.ClearList();
+                if (smartStamp)
+                {
+                    System.IO.DirectoryInfo dir = new DirectoryInfo(tempFolder);
+                    foreach (FileInfo file in dir.GetFiles())
+                    {
+                        file.Delete();
+                    }
+                }
+                form1.UpdateCurrentBatesNumber(currentBates, batesPrefix);
                 MessageBox.Show("Bates Stamping Complete.", Globals.appName);
-            }
-            else
-            {
-                //Directory doesn't exist
-                //Create or warn not sure yet
             }
         }
         #endregion

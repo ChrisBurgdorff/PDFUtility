@@ -136,6 +136,7 @@
   <ItemGroup>
     <Folder Include="Output\" />
     <Folder Include="Projects\" />
+    <Folder Include="Temp\" />
   </ItemGroup>
   <ItemGroup>
     <COMReference Include="Microsoft.Office.Core">
