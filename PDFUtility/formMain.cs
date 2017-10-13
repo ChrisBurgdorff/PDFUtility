@@ -18,7 +18,7 @@ using Microsoft.Office.Interop.Excel;
 namespace PDFUtility
 {
     #region enums
-    public enum Location
+    public enum StampLocation
     {
         LOWER_RIGHT,
         LOWER_LEFT,
@@ -54,6 +54,10 @@ namespace PDFUtility
             chkSubfolders.Visible = false;
             this.Text = Globals.appName + " - " + Globals.currentProject;
             txtFolderBates.Text = Globals.outputFolder;
+            
+        }
+        private void formMain_Load(object sender, EventArgs e)
+        {
             InitializeSaveFile();
         }
         #endregion
@@ -192,7 +196,7 @@ namespace PDFUtility
             if (int.TryParse(txtStartNumber.Text, out startNumber))
             {
                 // it's a valid integer
-                pu.BatesStamp(files, startNumber, batesPrefix);
+                BatesStamp(files, startNumber, batesPrefix);
                 //txtStartNumber.Text = Globals.currentBates.ToString();
             }
             else
@@ -331,7 +335,7 @@ namespace PDFUtility
                     string fileName = Path.GetFileName(s[i]);
                     string path = Path.GetDirectoryName(s[i]);
                     string fileNumber = (1 + lstBatesFiles.Items.Count).ToString();
-                    string pageCount = pu.PageCount(s[i]).ToString();
+                    string pageCount = PageCount(s[i]).ToString();
                     ListViewItem item = new ListViewItem(new[] { fileNumber, fileName, pageCount, "N/A", path });
                     lstBatesFiles.Items.Add(item);
                 }
@@ -414,7 +418,7 @@ namespace PDFUtility
             {
                 fileName = Path.GetFileName(files[i]);
                 fileNumber = (1 + lstBatesFiles.Items.Count).ToString();
-                pageCount = pu.PageCount(files[i]).ToString();
+                pageCount = PageCount(files[i]).ToString();
                 ListViewItem item = new ListViewItem(new[] {fileNumber, fileName, pageCount, "N/A", path });
                 lstBatesFiles.Items.Add(item);
                 UpdateStatus(i+1, files.Length, Activity.ADDING_FILES);
@@ -442,7 +446,7 @@ namespace PDFUtility
             {
                 fileName = Path.GetFileName(files[i]);
                 fileNumber = (1 + lstBatesFiles.Items.Count).ToString();
-                pageCount = pu.PageCount(files[i]).ToString();
+                pageCount = PageCount(files[i]).ToString();
                 path = Path.GetDirectoryName(files[i]);
                 ListViewItem item = new ListViewItem(new[] { fileNumber, fileName, pageCount, "N/A", path });
                 lstBatesFiles.Items.Add(item);
@@ -493,13 +497,15 @@ namespace PDFUtility
         #region Save and Load
         private void InitializeSaveFile()
         {
+            //Added after switch to fucking Globals.
+            Globals.history = new List<Action>();
             //Initialize current static save file to all default values
             SaveFileStatic.batesNumber = 1;
             SaveFileStatic.batesPrefix = "";
             SaveFileStatic.font = new iTextSharp.text.Font(BaseFont.CreateFont(BaseFont.HELVETICA_BOLD, BaseFont.CP1252, BaseFont.NOT_EMBEDDED), 15);
             SaveFileStatic.history = new List<Action>();
             SaveFileStatic.location = Globals.stampLocation;
-            SaveFileStatic.name = "";
+            SaveFileStatic.name = "bla bla bla";
             SaveFileStatic.outputFolder = Globals.outputFolder;
             SaveFileStatic.transparency = 1f;
             var baseFont = BaseFont.CreateFont(BaseFont.HELVETICA_BOLD, BaseFont.CP1252, BaseFont.NOT_EMBEDDED);
@@ -516,16 +522,19 @@ namespace PDFUtility
         {
             string response = "Project Saved Successfully.";
             SaveFile s = new SaveFile();
-            s.batesNumber = SaveFileStatic.batesNumber;
-            s.batesPrefix = SaveFileStatic.batesPrefix;
-            s.font = SaveFileStatic.font;
-            s.history = SaveFileStatic.history;
-            s.location = SaveFileStatic.location;
-            s.name = SaveFileStatic.name;
-            s.outputFolder = SaveFileStatic.outputFolder;
-            s.transparency = SaveFileStatic.transparency;
-            string data = JsonConvert.SerializeObject(s);
+            Globals.currentProject = Path.GetFileNameWithoutExtension(path);
+            s.name = Globals.currentProject;
+            s.batesNumber = Globals.currentBates;
+            s.batesPrefix = Globals.batesPrefix;
+            s.font = Globals.font;
+            s.history = Globals.history;
+            s.location = Globals.stampLocation;
+            s.name = Globals.currentProject;
+            s.outputFolder = Globals.outputFolder;
+            s.transparency = Globals.stampTransparency;
+            string data = JsonConvert.SerializeObject(s, Formatting.Indented);
             System.IO.File.WriteAllText(path, data);
+            this.Text = Globals.appName + " - " + Globals.currentProject;
             return response;
         }
 
@@ -534,6 +543,13 @@ namespace PDFUtility
             string response = "Project Loaded Successfully.";
             string data = System.IO.File.ReadAllText(path);
             SaveFile s = JsonConvert.DeserializeObject<SaveFile>(data);
+            Globals.currentProject = s.name;
+            Globals.currentBates = s.batesNumber;
+            Globals.batesPrefix = s.batesPrefix;
+            Globals.stampTransparency = s.transparency;
+            Globals.font = s.font;
+            Globals.stampLocation = s.location;
+            Globals.history = s.history;
             SaveFileStatic.batesNumber = s.batesNumber;
             SaveFileStatic.batesPrefix = s.batesPrefix;
             SaveFileStatic.font = s.font;
@@ -544,10 +560,13 @@ namespace PDFUtility
             SaveFileStatic.transparency = s.transparency;
             Globals.outputFolder = s.outputFolder;
             txtFolderBates.Text = s.outputFolder;
+            txtBatesPrefix.Text = s.batesPrefix;
+            txtStartNumber.Text = s.batesNumber.ToString();
+            this.Text = Globals.appName + " - " + Globals.currentProject;
             return response;
         }
         #endregion
-
+        #region Tool Strip Menu
         private void nEwToolStripMenuItem_Click(object sender, EventArgs e)
         {
             MessageBox.Show("SDF");
@@ -558,11 +577,8 @@ namespace PDFUtility
             formAbout form = new formAbout();
             form.Show();
         }
-    }
-
-    public partial class PDFUtility
-    {
-        #region Helper Functions
+        #endregion
+        #region Bates Stamping
         public int PageCount(string pdfFile)
         {
             int pageCount = 0;
@@ -575,9 +591,6 @@ namespace PDFUtility
             }
             return pageCount;
         }
-        #endregion
-
-        #region Main Logic
         public void BatesStamp(string[] files, int startNumber, string batesPrefix)
         {
             string outputFolder = Globals.outputFolder;
@@ -649,6 +662,7 @@ namespace PDFUtility
                             //var baseFont = BaseFont.CreateFont(BaseFont.HELVETICA_BOLD, BaseFont.CP1252, BaseFont.NOT_EMBEDDED);
                             //iTextSharp.text.Font font = new iTextSharp.text.Font(baseFont, 15);     
                             iTextSharp.text.Font font = Globals.font;
+                            Globals.batesPrefix = batesPrefix;
                             using (PdfStamper stamper = new PdfStamper(reader, new FileStream(outputPath, FileMode.Create, FileAccess.Write)))
                             {
                                 int pages = reader.NumberOfPages;
@@ -663,37 +677,37 @@ namespace PDFUtility
                                     float printX, printY;
                                     switch (Globals.stampLocation)
                                     {
-                                        case Location.CENTER:
+                                        case StampLocation.CENTER:
                                             printX = width / 2;
                                             printY = height / 2;
                                             alignment = Element.ALIGN_CENTER;
                                             break;
-                                        case Location.CENTER_BOTTOM:
+                                        case StampLocation.CENTER_BOTTOM:
                                             printX = width / 2;
                                             printY = 20;
                                             alignment = Element.ALIGN_CENTER;
                                             break;
-                                        case Location.CENTER_TOP:
+                                        case StampLocation.CENTER_TOP:
                                             printX = width / 2;
                                             printY = height - 20;
                                             alignment = Element.ALIGN_CENTER;
                                             break;
-                                        case Location.LOWER_LEFT:
+                                        case StampLocation.LOWER_LEFT:
                                             printX = 20;
                                             printY = 20;
                                             alignment = Element.ALIGN_LEFT;
                                             break;
-                                        case Location.LOWER_RIGHT:
+                                        case StampLocation.LOWER_RIGHT:
                                             printX = width - 20;
                                             printY = 20;
                                             alignment = Element.ALIGN_RIGHT;
                                             break;
-                                        case Location.UPPER_LEFT:
+                                        case StampLocation.UPPER_LEFT:
                                             printX = 20;
                                             printY = height - 20;
                                             alignment = Element.ALIGN_LEFT;
                                             break;
-                                        case Location.UPPER_RIGHT:
+                                        case StampLocation.UPPER_RIGHT:
                                             printX = width - 20;
                                             printY = height - 20;
                                             alignment = Element.ALIGN_RIGHT;
@@ -713,6 +727,9 @@ namespace PDFUtility
                                 }//End For
                             }//End using
                             reader.Close();
+                            string batesRange = (currentBates - reader.NumberOfPages).ToString() + "-" + (currentBates - 1).ToString();
+                            Action action = new Action(fileNameOnly, fileName, fileNameOnly, outputPath, batesRange, batesPrefix, DateTime.Now);
+                            Globals.history.Add(action);
                         }//End using
                     } //End if   
                 }//End For
@@ -726,18 +743,30 @@ namespace PDFUtility
                         file.Delete();
                     }
                 }
+                Globals.currentBates = currentBates;
                 form1.UpdateCurrentBatesNumber(currentBates, batesPrefix);
                 MessageBox.Show("Bates Stamping Complete.", Globals.appName);
             }
         }
+        #endregion
+    }
+
+    public partial class PDFUtility
+    {
+        #region Helper Functions
+        
+        #endregion
+
+        #region Main Logic
+        
         #endregion
 
     } //End Class PdfUtility
 
     public class Action
     {
-        private string oldFile, oldPath, newFile, newPath, batesRange, batesPrefix;
-        private DateTime date;
+        public string oldFile, oldPath, newFile, newPath, batesRange, batesPrefix;
+        public DateTime date;
 
         public Action(string oldFile, string oldPath, string newFile, string newPath, string batesRange, string batesPrefix, DateTime date)
         {
@@ -781,8 +810,8 @@ namespace PDFUtility
             set { _batesNumber = value; }
         }
 
-        private static Location _location = Location.LOWER_RIGHT;
-        public static Location location
+        private static StampLocation _location = StampLocation.LOWER_RIGHT;
+        public static StampLocation location
         {
             get { return _location; }
             set { _location = value; }
@@ -847,8 +876,8 @@ namespace PDFUtility
             set { _batesNumber = value; }
         }
 
-        private Location _location = Location.LOWER_RIGHT;
-        public Location location
+        private StampLocation _location = StampLocation.LOWER_RIGHT;
+        public StampLocation location
         {
             get { return _location; }
             set { _location = value; }
@@ -909,7 +938,12 @@ namespace PDFUtility
             get { return _appName; }
             set { _appName = value; }
         }
-
+        private static string _batesPrefix;
+        public static string batesPrefix
+        {
+            get { return _batesPrefix; }
+            set { _batesPrefix = value; }
+        }
         private static int _currentBates = 1;
         public static int currentBates
         {
@@ -917,8 +951,8 @@ namespace PDFUtility
             set { _currentBates = value; }
         }
 
-        private static Location _stampLocation = Location.LOWER_RIGHT;
-        public static Location stampLocation
+        private static StampLocation _stampLocation = StampLocation.LOWER_RIGHT;
+        public static StampLocation stampLocation
         {
             get { return _stampLocation; }
             set { _stampLocation = value; }
@@ -965,6 +999,13 @@ namespace PDFUtility
         {
             get { return _smartStamp; }
             set { _smartStamp = value; }
+        }
+
+        private static List<Action> _history;
+        public static List<Action> history
+        {
+            get { return _history; }
+            set { _history = value; }
         }
     }
 }

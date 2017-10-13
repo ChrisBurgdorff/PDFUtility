@@ -494,6 +494,7 @@
             this.MinimumSize = new System.Drawing.Size(686, 440);
             this.Name = "formMain";
             this.Text = "PDF Utility";
+            this.Load += new System.EventHandler(this.formMain_Load);
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
             this.toolStrip1.ResumeLayout(false);

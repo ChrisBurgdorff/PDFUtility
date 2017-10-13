@@ -30,29 +30,29 @@ namespace PDFUtilityOptions
         private void InitializeOptions()
         {
             float transparency;
-            PDFUtility.Location stampLocation = Globals.stampLocation;
+            PDFUtility.StampLocation stampLocation = Globals.stampLocation;
 
             switch (stampLocation)
             {
-                case PDFUtility.Location.LOWER_RIGHT:
+                case PDFUtility.StampLocation.LOWER_RIGHT:
                     comboBoxLocation.SelectedIndex = 0;
                     break;
-                case PDFUtility.Location.LOWER_LEFT:
+                case PDFUtility.StampLocation.LOWER_LEFT:
                     comboBoxLocation.SelectedIndex = 1;
                     break;
-                case PDFUtility.Location.UPPER_RIGHT:
+                case PDFUtility.StampLocation.UPPER_RIGHT:
                     comboBoxLocation.SelectedIndex = 2;
                     break;
-                case PDFUtility.Location.UPPER_LEFT:
+                case PDFUtility.StampLocation.UPPER_LEFT:
                     comboBoxLocation.SelectedIndex = 3;
                     break;
-                case PDFUtility.Location.CENTER:
+                case PDFUtility.StampLocation.CENTER:
                     comboBoxLocation.SelectedIndex = 4;
                     break;
-                case PDFUtility.Location.CENTER_BOTTOM:
+                case PDFUtility.StampLocation.CENTER_BOTTOM:
                     comboBoxLocation.SelectedIndex = 5;
                     break;
-                case PDFUtility.Location.CENTER_TOP:
+                case PDFUtility.StampLocation.CENTER_TOP:
                     comboBoxLocation.SelectedIndex = 6;
                     break;
             }
@@ -223,25 +223,25 @@ namespace PDFUtilityOptions
             switch (comboBoxLocation.SelectedIndex)
             {
                 case 0:
-                    Globals.stampLocation = PDFUtility.Location.LOWER_RIGHT;
+                    Globals.stampLocation = PDFUtility.StampLocation.LOWER_RIGHT;
                     break;
                 case 1:
-                    Globals.stampLocation = PDFUtility.Location.LOWER_LEFT;
+                    Globals.stampLocation = PDFUtility.StampLocation.LOWER_LEFT;
                     break;
                 case 2:
-                    Globals.stampLocation = PDFUtility.Location.UPPER_RIGHT;
+                    Globals.stampLocation = PDFUtility.StampLocation.UPPER_RIGHT;
                     break;
                 case 3:
-                    Globals.stampLocation = PDFUtility.Location.UPPER_LEFT;
+                    Globals.stampLocation = PDFUtility.StampLocation.UPPER_LEFT;
                     break;
                 case 4:
-                    Globals.stampLocation = PDFUtility.Location.CENTER;
+                    Globals.stampLocation = PDFUtility.StampLocation.CENTER;
                     break;
                 case 5:
-                    Globals.stampLocation = PDFUtility.Location.CENTER_BOTTOM;
+                    Globals.stampLocation = PDFUtility.StampLocation.CENTER_BOTTOM;
                     break;
                 case 6:
-                    Globals.stampLocation = PDFUtility.Location.CENTER_TOP;
+                    Globals.stampLocation = PDFUtility.StampLocation.CENTER_TOP;
                     break;
             }
             switch (chkSmartStamp.Checked)
