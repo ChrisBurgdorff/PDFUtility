@@ -38,6 +38,20 @@ namespace PDFUtility
 
     public partial class formMain : Form
     {
+        //MAIN TODO LIST
+        //Track whenever unsaved changes made to file (for disabling and enabling save and save as buttons)
+        //Fix and test new save/load function
+        //Help file
+        //Export history to Excel
+        //Add hot keys
+        //Keep track of shit for undo
+        //look into stamping image files  (whatever can be stamped)
+        //Ask for feature ideas
+        //Create installer
+        //Associate file extension and give icon
+        //Buy template and make landing page
+        //sign up for software marketplace
+        //put online and make thousands of dollars!!
         #region Form
         public formMain()
         {
@@ -381,6 +395,87 @@ namespace PDFUtility
         #endregion
 
         #region Tool Strip Menu
+        private void nEwToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            //MessageBox.Show("SDF");
+            if (Globals.isSaved && !Globals.isCurrent)
+            {
+                string message = "Do you wish to save changes to " + Globals.currentProject + "?";
+                string caption = Globals.appName;
+                MessageBoxButtons buttons = MessageBoxButtons.YesNoCancel;
+                DialogResult result;
+                result = MessageBox.Show(message, caption, buttons);
+                if (result == System.Windows.Forms.DialogResult.Yes)
+                {
+                    ClearStatus(SaveProject(Globals.currentSavePath));
+                    NewProject();
+                }
+                else if (result == System.Windows.Forms.DialogResult.No)
+                {
+                    NewProject();
+                }
+            }
+            else if (Globals.isSaved && Globals.isCurrent)
+            {
+                NewProject();
+            }
+            else if (!Globals.isCurrent)
+            {
+                string message = "Do you wish to save changes to current project?";
+                string caption = Globals.appName;
+                MessageBoxButtons buttons = MessageBoxButtons.YesNoCancel;
+                DialogResult result;
+                result = MessageBox.Show(message, caption, buttons);
+                if (result == System.Windows.Forms.DialogResult.No)
+                {
+                    NewProject();
+                }
+                else if (result == System.Windows.Forms.DialogResult.Yes)
+                {
+                    SaveFileDialog sfd = new SaveFileDialog();
+                    sfd.Filter = "Bates Plus Files|*.bpp";
+                    sfd.DefaultExt = ".bpp";
+                    if (sfd.ShowDialog() == DialogResult.OK)
+                    {
+                        ClearStatus(SaveProject(sfd.FileName));
+                        NewProject();
+                    }
+                }
+            }
+        }
+        private void openToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            //TODO: Check if project needs to be saved first
+            OpenFileDialog ofd = new OpenFileDialog();
+            ofd.Filter = "Bates Plus Files|*.bpp";
+            ofd.DefaultExt = ".bpp";
+            if (ofd.ShowDialog() == DialogResult.OK)
+            {
+                ClearStatus(LoadProject(ofd.FileName));
+            }
+        }
+
+        private void saveToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            ClearStatus(SaveProject(Globals.currentSavePath));
+        }
+
+        private void saveAsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            SaveFileDialog sfd = new SaveFileDialog();
+            sfd.Filter = "Bates Plus Files|*.bpp";
+            sfd.DefaultExt = ".bpp";
+            if (sfd.ShowDialog() == DialogResult.OK)
+            {
+                ClearStatus(SaveProject(sfd.FileName));
+            }
+        }
+
+        private void aboutBatesPlusToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            formAbout form = new formAbout();
+            form.Show();
+        }
         private void exitToolStripMenuItem_Click(object sender, EventArgs e)
         {
             System.Windows.Forms.Application.Exit();
@@ -494,7 +589,11 @@ namespace PDFUtility
         }
         #endregion
 
-        #region Save and Load
+        #region Save and Load and New
+        private void NewProject()
+        {
+
+        }
         private void InitializeSaveFile()
         {
             //Added after switch to fucking Globals.
@@ -535,6 +634,9 @@ namespace PDFUtility
             string data = JsonConvert.SerializeObject(s, Formatting.Indented);
             System.IO.File.WriteAllText(path, data);
             this.Text = Globals.appName + " - " + Globals.currentProject;
+            Globals.currentSavePath = path;
+            Globals.isCurrent = true;
+            Globals.isSaved = true;
             return response;
         }
 
@@ -559,6 +661,9 @@ namespace PDFUtility
             SaveFileStatic.outputFolder = s.outputFolder;
             SaveFileStatic.transparency = s.transparency;
             Globals.outputFolder = s.outputFolder;
+            Globals.currentSavePath = path;
+            Globals.isCurrent = true;
+            Globals.isSaved = true;
             txtFolderBates.Text = s.outputFolder;
             txtBatesPrefix.Text = s.batesPrefix;
             txtStartNumber.Text = s.batesNumber.ToString();
@@ -566,18 +671,7 @@ namespace PDFUtility
             return response;
         }
         #endregion
-        #region Tool Strip Menu
-        private void nEwToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            MessageBox.Show("SDF");
-        }
 
-        private void aboutBatesPlusToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            formAbout form = new formAbout();
-            form.Show();
-        }
-        #endregion
         #region Bates Stamping
         public int PageCount(string pdfFile)
         {
@@ -749,10 +843,12 @@ namespace PDFUtility
             }
         }
         #endregion
+        
     }
 
     public partial class PDFUtility
     {
+        //I think I can delete this but I'm too scared to do it now
         #region Helper Functions
         
         #endregion
@@ -782,6 +878,7 @@ namespace PDFUtility
 
     static class SaveFileStatic
     {
+        //I think I can delete this too since I switched everything over to Globals.
         private static string _name;
         public static string name
         {
@@ -1006,6 +1103,27 @@ namespace PDFUtility
         {
             get { return _history; }
             set { _history = value; }
+        }
+
+        private static bool _isSaved = false;
+        public static bool isSaved
+        {
+            get { return _isSaved; }
+            set { _isSaved = value; }
+        }
+
+        private static bool _isCurrent = true;
+        public static bool isCurrent
+        {
+            get { return _isCurrent; }
+            set { _isCurrent = value; }
+        }
+
+        private static string _currentSavePath = "";
+        public static string currentSavePath
+        {
+            get { return _currentSavePath; }
+            set { _currentSavePath = value; }
         }
     }
 }
