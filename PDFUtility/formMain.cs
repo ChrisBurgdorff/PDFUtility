@@ -14,6 +14,8 @@ using iTextSharp.text.pdf;
 using System.Collections;
 using Newtonsoft.Json;
 using Microsoft.Office.Interop.Excel;
+using System.Drawing.Drawing2D;
+using System.Drawing.Text;
 
 namespace PDFUtility
 {
@@ -39,19 +41,27 @@ namespace PDFUtility
     public partial class formMain : Form
     {
         //MAIN TODO LIST
-        //Track whenever unsaved changes made to file (for disabling and enabling save and save as buttons)
+        //Fonts not saving
+        //Test file6.pdf last page not printing in correct spot
+        //Track whenever unsaved changes made to file (for disabling and enabling save and save as buttons) - might not need this
         //Fix and test new save/load function
+        //Add image file formats (word docs possibly as well
         //Help file
         //Export history to Excel
         //Add hot keys
+        //Constant number of digits - done not tested
         //Keep track of shit for undo
         //look into stamping image files  (whatever can be stamped)
         //Ask for feature ideas
         //Create installer
         //Associate file extension and give icon
-        //Buy template and make landing page
+        //Save Shit to stamp - done, not tested
+        //Buy template and make landing page - done
         //sign up for software marketplace
         //put online and make thousands of dollars!!
+        /*
+         Changes made: options changed, files added, folders added, drag and drop, bates number changed, bates prefix changed, anything stamped - don't need this
+             */
         #region Form
         public formMain()
         {
@@ -77,6 +87,22 @@ namespace PDFUtility
         #endregion
 
         #region Helper Functions
+        /*I don't think I need this
+        private void ChangesMade()
+        {
+            Globals.isCurrent = false;
+            if (Globals.isSaved)
+            {
+                saveAsToolStripMenuItem.Enabled = true;
+                saveToolStripMenuItem.Enabled = true;
+            }
+            else
+            {
+                saveAsToolStripMenuItem.Enabled = true;
+                saveToolStripMenuItem.Enabled = false;
+            }
+        }*/
+
         private void EmptyList(bool isEmpty)
         {
             if (isEmpty)
@@ -95,12 +121,27 @@ namespace PDFUtility
             }
         }
 
+        private string ConstantNumber(int number, int digits)
+        {
+            string newNumber = "";
+            for (int i = 0; i < digits - number.ToString().Length; i++)
+            {
+                newNumber = newNumber + "0";
+            }
+            newNumber = newNumber + number.ToString();
+            return newNumber;
+        }
+
         private void FixFileList()
         {
             int fileNum = 1;
             int startingBates = 1;
             int endingBates;
             int numPages;
+            int numDigits = txtStartNumber.Text.Length;
+            if (numDigits == 0)
+                numDigits = 1;
+
             if (int.TryParse(txtStartNumber.Text, out startingBates)) { } //Puts int value of text from start number field in startingBates
             else
             { //if empty string or non-int make everything 1, which is default
@@ -116,7 +157,7 @@ namespace PDFUtility
                 if (numPages != 0)
                 {
                     endingBates = startingBates + numPages - 1;
-                    lstBatesFiles.Items[i].SubItems[3].Text = startingBates.ToString() + " - " + endingBates.ToString();
+                    lstBatesFiles.Items[i].SubItems[3].Text = ConstantNumber(startingBates, numDigits) + " - " + ConstantNumber(endingBates, numDigits);
                     startingBates = endingBates + 1;
                 }
             }
@@ -352,6 +393,11 @@ namespace PDFUtility
                     string pageCount = PageCount(s[i]).ToString();
                     ListViewItem item = new ListViewItem(new[] { fileNumber, fileName, pageCount, "N/A", path });
                     lstBatesFiles.Items.Add(item);
+                    if (Globals.toStamp == null)
+                    {
+                        Globals.toStamp = new List<ActionToStamp>();
+                    }
+                    Globals.toStamp.Add(new ActionToStamp(fileNumber, fileName, pageCount, path));
                 }
             }
             FixFileList();
@@ -517,6 +563,11 @@ namespace PDFUtility
                 ListViewItem item = new ListViewItem(new[] {fileNumber, fileName, pageCount, "N/A", path });
                 lstBatesFiles.Items.Add(item);
                 UpdateStatus(i+1, files.Length, Activity.ADDING_FILES);
+                if (Globals.toStamp == null)
+                {
+                    Globals.toStamp = new List<ActionToStamp>();
+                }
+                Globals.toStamp.Add(new ActionToStamp(fileNumber, fileName, pageCount, path));
             }
             FixFileList();
             ClearStatus("Click Bates Stamp to stamp these files.");
@@ -546,6 +597,11 @@ namespace PDFUtility
                 ListViewItem item = new ListViewItem(new[] { fileNumber, fileName, pageCount, "N/A", path });
                 lstBatesFiles.Items.Add(item);
                 UpdateStatus(i+1, files.Length, Activity.ADDING_FILES);
+                if (Globals.toStamp == null)
+                {
+                    Globals.toStamp = new List<ActionToStamp>();
+                }
+                Globals.toStamp.Add(new ActionToStamp(fileNumber, fileName, pageCount, path));
             }
             FixFileList();
             ClearStatus("Click Bates Stamp to stamp these files.");
@@ -644,6 +700,8 @@ namespace PDFUtility
         {
             string response = "Project Loaded Successfully.";
             string data = System.IO.File.ReadAllText(path);
+            //[JsonProperty]
+            //public Guid? ClientId { get; private set; }
             SaveFile s = JsonConvert.DeserializeObject<SaveFile>(data);
             Globals.currentProject = s.name;
             Globals.currentBates = s.batesNumber;
@@ -664,6 +722,14 @@ namespace PDFUtility
             Globals.currentSavePath = path;
             Globals.isCurrent = true;
             Globals.isSaved = true;
+            Globals.toStamp = s.toStamp;
+            //Fill in list view now
+            for (int i = 0; i < s.toStamp.Count; i++)
+            {
+                ListViewItem item = new ListViewItem(new[] { s.toStamp[i].fileNumber, s.toStamp[i].fileName, s.toStamp[i].pageCount, "N/A", s.toStamp[i].path });
+                lstBatesFiles.Items.Add(item);
+            }
+            //end list view
             txtFolderBates.Text = s.outputFolder;
             txtBatesPrefix.Text = s.batesPrefix;
             txtStartNumber.Text = s.batesNumber.ToString();
@@ -697,6 +763,7 @@ namespace PDFUtility
             formMain form1 = new formMain();
             form1 = (formMain)System.Windows.Forms.Application.OpenForms[0];
             bool outputGood = false;
+            int numDigits = txtStartNumber.Text.Length;
             if (!Directory.Exists(outputFolder))
             {
                 if (MessageBox.Show("The output folder does not exist.  Do you want to create it?", Globals.appName, MessageBoxButtons.YesNo) == DialogResult.Yes)
@@ -711,6 +778,7 @@ namespace PDFUtility
             }
             if (outputGood)
             {
+                Globals.toStamp.Clear();
                 for (int i = 0; i < files.Length; i++)
                 {
                     fileName = files[i];
@@ -762,7 +830,7 @@ namespace PDFUtility
                                 int pages = reader.NumberOfPages;
                                 for (int j = 1; j <= pages; j++)
                                 {
-                                    var batesStamp = batesPrefix + " " + currentBates.ToString();
+                                    var batesStamp = batesPrefix + " " + ConstantNumber(currentBates, numDigits);
                                     Phrase p = new Phrase(batesStamp, font);
                                     currentBates++;
                                     float height = reader.GetCropBox(j).Height;
@@ -825,7 +893,89 @@ namespace PDFUtility
                             Action action = new Action(fileNameOnly, fileName, fileNameOnly, outputPath, batesRange, batesPrefix, DateTime.Now);
                             Globals.history.Add(action);
                         }//End using
-                    } //End if   
+                    }
+                    else if (Path.GetExtension(fileName) == ".gif" || Path.GetExtension(fileName) == ".bmp" || Path.GetExtension(fileName) == ".jpeg" || Path.GetExtension(fileName) == ".jpg"
+                        || Path.GetExtension(fileName) == ".png" || Path.GetExtension(fileName) == ".tiff" || Path.GetExtension(fileName) == ".tif")
+                    {
+                        //Image stamping
+                        string batesStamp = batesPrefix + " " + ConstantNumber(currentBates, numDigits);
+                        currentBates++;
+                        PointF loc = new PointF(10f, 10f); //TODO: Set Location
+                        Bitmap img = (Bitmap)System.Drawing.Image.FromFile(fileName);
+                        float newTransparency = Globals.stampTransparency;
+                        int alpha = Convert.ToInt32((newTransparency) * 255);
+                        alpha = Math.Min(alpha, 255);
+                        alpha = Math.Max(alpha, 0);
+                        SolidBrush brush = new SolidBrush(Color.FromArgb(alpha, 0, 0, 0));
+                        RectangleF entireImage = new RectangleF(0, 0, img.Width, img.Height);
+                        using (Graphics graphics = Graphics.FromImage(img))
+                        {
+                            //For High Quality Text
+                            graphics.SmoothingMode = SmoothingMode.AntiAlias;
+                            graphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
+                            graphics.PixelOffsetMode = PixelOffsetMode.HighQuality;
+                            graphics.TextRenderingHint = TextRenderingHint.AntiAliasGridFit;
+                            StringAlignment horizontal = new StringAlignment();
+                            StringAlignment vertical = new StringAlignment();
+                            switch (Globals.stampLocation)
+                            {
+                                case StampLocation.CENTER:
+                                    horizontal = StringAlignment.Center;
+                                    vertical = StringAlignment.Center;
+                                    break;
+                                case StampLocation.CENTER_BOTTOM:
+                                    horizontal = StringAlignment.Center;
+                                    vertical = StringAlignment.Far;
+                                    break;
+                                case StampLocation.CENTER_TOP:
+                                    horizontal = StringAlignment.Center;
+                                    vertical = StringAlignment.Near;
+                                    break;
+                                case StampLocation.LOWER_LEFT:
+                                    horizontal = StringAlignment.Near;
+                                    vertical = StringAlignment.Far;
+                                    break;
+                                case StampLocation.LOWER_RIGHT:
+                                    horizontal = StringAlignment.Far;
+                                    vertical = StringAlignment.Far;
+                                    break;
+                                case StampLocation.UPPER_LEFT:
+                                    horizontal = StringAlignment.Near;
+                                    vertical = StringAlignment.Near;
+                                    break;
+                                case StampLocation.UPPER_RIGHT:
+                                    horizontal = StringAlignment.Far;
+                                    vertical = StringAlignment.Near;
+                                    break;
+                                default:
+                                    //Default: lower right
+                                    horizontal = StringAlignment.Far;
+                                    vertical = StringAlignment.Far;
+                                    break;
+                            }
+                            StringFormat format = new StringFormat()
+                            {
+                                Alignment = horizontal,
+                                LineAlignment = vertical
+                            };
+                            using (System.Drawing.Font imageFont = new System.Drawing.Font("Arial", 10)) //TODO: Select right font
+                            {
+                                graphics.DrawString(batesStamp, imageFont, brush, entireImage, format); //TODO: Add Transparency - Done
+                            }
+                        }
+                        fileNameOnly = Path.GetFileName(fileName);
+                        outputPath = outputFolder + @"\" + fileNameOnly;
+                        img.Save(outputPath);
+                    }
+                    else if (Path.GetExtension(fileName) == ".doc" || Path.GetExtension(fileName) == ".dot" || Path.GetExtension(fileName) == ".docx" || Path.GetExtension(fileName) == ".docm"
+                        || Path.GetExtension(fileName) == ".dotx" || Path.GetExtension(fileName) == ".dotm" || Path.GetExtension(fileName) == ".docb")
+                    {
+                        //Word Document stamping
+                    }
+                    else
+                    {
+                        //TODO: Invalid file type
+                    }//End if   
                 }//End For
                 form1.ClearStatus(files.Length + " Files Stamped to " + Path.GetDirectoryName(outputPath) + @"\");
                 form1.ClearList();
@@ -873,6 +1023,18 @@ namespace PDFUtility
             this.batesRange = batesRange;
             this.batesPrefix = batesPrefix;
             this.date = date;
+        }
+    }
+
+    public class ActionToStamp
+    {
+        public string fileNumber, fileName, pageCount, path;
+        public ActionToStamp(string fileNumber, string fileName, string pageCount, string path)
+        {
+            this.fileNumber = fileNumber;
+            this.fileName = fileName;
+            this.pageCount = pageCount;
+            this.path = path;
         }
     }
 
@@ -1007,6 +1169,13 @@ namespace PDFUtility
             get { return _history; }
             set { _history = value; }
         }
+
+        private List<ActionToStamp> _toStamp;
+        public List<ActionToStamp> toStamp
+        {
+            get { return _toStamp; }
+            set { _toStamp = value; }
+        }
     }
     
     static class Globals
@@ -1103,6 +1272,13 @@ namespace PDFUtility
         {
             get { return _history; }
             set { _history = value; }
+        }
+
+        private static List<ActionToStamp> _toStamp;
+        public static List<ActionToStamp> toStamp
+        {
+            get { return _toStamp; }
+            set { _toStamp = value; }
         }
 
         private static bool _isSaved = false;
