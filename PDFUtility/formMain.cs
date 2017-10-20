@@ -16,6 +16,8 @@ using Newtonsoft.Json;
 using Microsoft.Office.Interop.Excel;
 using System.Drawing.Drawing2D;
 using System.Drawing.Text;
+using Microsoft.Office.Interop.Word;
+using Spire.Doc;
 
 namespace PDFUtility
 {
@@ -36,32 +38,45 @@ namespace PDFUtility
         ADDING_FILES,
         BATES_STAMPING
     }
+
+    public enum BatesFont
+    {
+        TIMES_NEW_ROMAN,
+        COURIER,
+        HELVETICA
+    }
     #endregion
 
     public partial class formMain : Form
     {
         //MAIN TODO LIST
-        //Fonts not saving
+        //Fonts not saving - done, not tested
         //Test file6.pdf last page not printing in correct spot
         //Track whenever unsaved changes made to file (for disabling and enabling save and save as buttons) - might not need this
         //Fix and test new save/load function
-        //Add image file formats (word docs possibly as well
+        //Add image file formats (word docs possibly as well) - done not tested
         //Help file
+        //Add message box warning when user selects SmartStamp
         //Export history to Excel
         //Add hot keys
         //Constant number of digits - done not tested
         //Keep track of shit for undo
-        //look into stamping image files  (whatever can be stamped)
         //Ask for feature ideas
         //Create installer
+        //Smart Stamping for Images???
+        //Excel format everything as text first... Fucking Excel.
         //Associate file extension and give icon
         //Save Shit to stamp - done, not tested
+        //Get it to not write over shit
         //Buy template and make landing page - done
         //sign up for software marketplace
         //put online and make thousands of dollars!!
         /*
          Changes made: options changed, files added, folders added, drag and drop, bates number changed, bates prefix changed, anything stamped - don't need this
              */
+        /*List of acceptable file extensions:
+         * bmp, doc, docb, docm, docx, dot, dotm, dotx, gif, jpeg, jpg, pdf, png, tif, tiff
+            */
         #region Form
         public formMain()
         {
@@ -78,7 +93,7 @@ namespace PDFUtility
             chkSubfolders.Visible = false;
             this.Text = Globals.appName + " - " + Globals.currentProject;
             txtFolderBates.Text = Globals.outputFolder;
-            
+                        
         }
         private void formMain_Load(object sender, EventArgs e)
         {
@@ -405,7 +420,7 @@ namespace PDFUtility
 
         public void InitializeListView()
         {
-            lstBatesFiles.View = View.Details;
+            lstBatesFiles.View = System.Windows.Forms.View.Details;
             lstBatesFiles.FullRowSelect = true;
         }  
 
@@ -525,6 +540,11 @@ namespace PDFUtility
         private void exitToolStripMenuItem_Click(object sender, EventArgs e)
         {
             System.Windows.Forms.Application.Exit();
+        }
+
+        private void viewHistoryToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            //TODO: View History
         }
         #endregion
 
@@ -670,6 +690,9 @@ namespace PDFUtility
                 SaveFileStatic.font = font;
                 //Fix Later
                 Globals.font = font;
+                Globals.bold = true;
+                Globals.italic = false;
+                Globals.batesFont = BatesFont.HELVETICA;
             }
         }
 
@@ -687,6 +710,9 @@ namespace PDFUtility
             s.name = Globals.currentProject;
             s.outputFolder = Globals.outputFolder;
             s.transparency = Globals.stampTransparency;
+            s.batesFont = Globals.batesFont;
+            s.bold = Globals.bold;
+            s.italic = Globals.italic;
             string data = JsonConvert.SerializeObject(s, Formatting.Indented);
             System.IO.File.WriteAllText(path, data);
             this.Text = Globals.appName + " - " + Globals.currentProject;
@@ -707,7 +733,7 @@ namespace PDFUtility
             Globals.currentBates = s.batesNumber;
             Globals.batesPrefix = s.batesPrefix;
             Globals.stampTransparency = s.transparency;
-            Globals.font = s.font;
+            //Globals.font = s.font;
             Globals.stampLocation = s.location;
             Globals.history = s.history;
             SaveFileStatic.batesNumber = s.batesNumber;
@@ -723,6 +749,74 @@ namespace PDFUtility
             Globals.isCurrent = true;
             Globals.isSaved = true;
             Globals.toStamp = s.toStamp;
+            Globals.batesFont = s.batesFont;
+            
+            int fontSize = Convert.ToInt32(Globals.font.Size);
+            iTextSharp.text.pdf.BaseFont baseFont = BaseFont.CreateFont();
+            bool bold = s.bold;
+            bool italic = s.italic;
+            switch (s.batesFont)
+            {
+                case BatesFont.COURIER:
+                    if (bold && italic)
+                    {
+                        baseFont = BaseFont.CreateFont(BaseFont.COURIER_BOLDOBLIQUE, BaseFont.CP1252, BaseFont.NOT_EMBEDDED);
+                    }
+                    else if (bold)
+                    {
+                        baseFont = BaseFont.CreateFont(BaseFont.COURIER_BOLD, BaseFont.CP1252, BaseFont.NOT_EMBEDDED);
+                    }
+                    else if (italic)
+                    {
+                        baseFont = BaseFont.CreateFont(BaseFont.COURIER_OBLIQUE, BaseFont.CP1252, BaseFont.NOT_EMBEDDED);
+                    }
+                    else
+                    {
+                        baseFont = BaseFont.CreateFont(BaseFont.COURIER, BaseFont.CP1252, BaseFont.NOT_EMBEDDED);
+                    }
+                    break;
+                case BatesFont.HELVETICA:
+                    if (bold && italic)
+                    {
+                        baseFont = BaseFont.CreateFont(BaseFont.HELVETICA_BOLDOBLIQUE, BaseFont.CP1252, BaseFont.NOT_EMBEDDED);
+                    }
+                    else if (bold)
+                    {
+                        baseFont = BaseFont.CreateFont(BaseFont.HELVETICA_BOLD, BaseFont.CP1252, BaseFont.NOT_EMBEDDED);
+                    }
+                    else if (italic)
+                    {
+                        baseFont = BaseFont.CreateFont(BaseFont.HELVETICA_OBLIQUE, BaseFont.CP1252, BaseFont.NOT_EMBEDDED);
+                    }
+                    else
+                    {
+                        baseFont = BaseFont.CreateFont(BaseFont.HELVETICA, BaseFont.CP1252, BaseFont.NOT_EMBEDDED);
+                    }
+                    break;
+                case BatesFont.TIMES_NEW_ROMAN:
+                    if (bold && italic)
+                    {
+                        baseFont = BaseFont.CreateFont(BaseFont.TIMES_BOLDITALIC, BaseFont.CP1252, BaseFont.NOT_EMBEDDED);
+                    }
+                    else if (bold)
+                    {
+                        baseFont = BaseFont.CreateFont(BaseFont.TIMES_BOLD, BaseFont.CP1252, BaseFont.NOT_EMBEDDED);
+                    }
+                    else if (italic)
+                    {
+                        baseFont = BaseFont.CreateFont(BaseFont.TIMES_ITALIC, BaseFont.CP1252, BaseFont.NOT_EMBEDDED);
+                    }
+                    else
+                    {
+                        baseFont = BaseFont.CreateFont(BaseFont.TIMES_ROMAN, BaseFont.CP1252, BaseFont.NOT_EMBEDDED);
+                    }
+                    break;
+                default:
+                    baseFont = BaseFont.CreateFont(BaseFont.HELVETICA_BOLD, BaseFont.CP1252, BaseFont.NOT_EMBEDDED);
+                    break;
+            }
+            iTextSharp.text.Font font = new iTextSharp.text.Font(baseFont, fontSize);
+            Globals.font = font;
             //Fill in list view now
             for (int i = 0; i < s.toStamp.Count; i++)
             {
@@ -737,17 +831,44 @@ namespace PDFUtility
             return response;
         }
         #endregion
-
+                
         #region Bates Stamping
-        public int PageCount(string pdfFile)
+        public int PageCountWord(object Path)
+        {
+            // Get application object
+            Microsoft.Office.Interop.Word.Application WordApplication = new Microsoft.Office.Interop.Word.Application();
+
+            // Get document object
+            object Miss = System.Reflection.Missing.Value;
+            object ReadOnly = false;
+            object Visible = false;
+            Microsoft.Office.Interop.Word.Document Doc = WordApplication.Documents.Open(ref Path, ref Miss, ref ReadOnly, ref Miss, ref Miss, ref Miss, ref Miss, ref Miss, ref Miss, ref Miss, ref Miss, ref Visible, ref Miss, ref Miss, ref Miss, ref Miss);
+
+            // Get pages count
+            Microsoft.Office.Interop.Word.WdStatistic PagesCountStat = Microsoft.Office.Interop.Word.WdStatistic.wdStatisticPages;
+            int PagesCount = Doc.ComputeStatistics(PagesCountStat, ref Miss);
+            Doc.Close();
+            return PagesCount;
+        }
+        public int PageCount(string fileName)
         {
             int pageCount = 0;
-            if (Path.GetExtension(pdfFile) == ".pdf")
+            if (Path.GetExtension(fileName) == ".pdf")
             {
-                using (var reader = new PdfReader(pdfFile))
+                using (var reader = new PdfReader(fileName))
                 {
                     pageCount = reader.NumberOfPages;
                 }
+            }
+            else if (Path.GetExtension(fileName) == ".doc" || Path.GetExtension(fileName) == ".dot" || Path.GetExtension(fileName) == ".docx" || Path.GetExtension(fileName) == ".docm"
+                        || Path.GetExtension(fileName) == ".dotx" || Path.GetExtension(fileName) == ".dotm" || Path.GetExtension(fileName) == ".docb")
+            {
+                pageCount = PageCountWord(fileName);
+            }
+            else if (Path.GetExtension(fileName) == ".gif" || Path.GetExtension(fileName) == ".bmp" || Path.GetExtension(fileName) == ".jpeg" || Path.GetExtension(fileName) == ".jpg"
+                        || Path.GetExtension(fileName) == ".png" || Path.GetExtension(fileName) == ".tiff" || Path.GetExtension(fileName) == ".tif")
+            {
+                pageCount = 1;
             }
             return pageCount;
         }
@@ -791,7 +912,7 @@ namespace PDFUtility
                         {
                             PdfReader pReader = new PdfReader(fileName);
                             int numPages = pReader.NumberOfPages;
-                            Document doc = new Document();
+                            iTextSharp.text.Document doc = new iTextSharp.text.Document();
                             fileNameOnly = Path.GetFileName(fileName);
                             //outputPath = outputFolder + @"\" + fileNameOnly;                            
                             System.IO.Directory.CreateDirectory(tempFolder);
@@ -958,7 +1079,37 @@ namespace PDFUtility
                                 Alignment = horizontal,
                                 LineAlignment = vertical
                             };
-                            using (System.Drawing.Font imageFont = new System.Drawing.Font("Arial", 10)) //TODO: Select right font
+                            System.Drawing.FontFamily fam = new System.Drawing.FontFamily("Helvetica");
+                            switch (Globals.batesFont)
+                            {
+                                case BatesFont.COURIER:
+                                    fam = new System.Drawing.FontFamily("Helvetica");
+                                    break;
+                                case BatesFont.HELVETICA:
+                                    fam = new System.Drawing.FontFamily("Helvetica");
+                                    break;
+                                case BatesFont.TIMES_NEW_ROMAN:
+                                    fam = new System.Drawing.FontFamily("Helvetica");
+                                    break;
+                            }
+                            System.Drawing.FontStyle style;
+                            if (Globals.bold && Globals.italic)
+                            {
+                                style = FontStyle.Bold | FontStyle.Italic;
+                            }
+                            else if (Globals.bold)
+                            {
+                                style = FontStyle.Bold;
+                            }
+                            else if (Globals.italic)
+                            {
+                                style = FontStyle.Italic;
+                            }
+                            else
+                            {
+                                style = FontStyle.Regular;
+                            }
+                            using (System.Drawing.Font imageFont = new System.Drawing.Font(fam, Globals.font.Size, style)) //TODO: Select right font - Done, I think
                             {
                                 graphics.DrawString(batesStamp, imageFont, brush, entireImage, format); //TODO: Add Transparency - Done
                             }
@@ -970,7 +1121,107 @@ namespace PDFUtility
                     else if (Path.GetExtension(fileName) == ".doc" || Path.GetExtension(fileName) == ".dot" || Path.GetExtension(fileName) == ".docx" || Path.GetExtension(fileName) == ".docm"
                         || Path.GetExtension(fileName) == ".dotx" || Path.GetExtension(fileName) == ".dotm" || Path.GetExtension(fileName) == ".docb")
                     {
-                        //Word Document stamping
+                        //Word Document Stamping
+                        fileNameOnly = Path.GetFileName(fileName);
+                        outputPath = outputFolder + @"\" + fileNameOnly;
+                        if (Globals.stampLocation == StampLocation.CENTER_BOTTOM || Globals.stampLocation == StampLocation.LOWER_LEFT || Globals.stampLocation == StampLocation.LOWER_RIGHT
+                            || Globals.stampLocation == StampLocation.CENTER_TOP || Globals.stampLocation == StampLocation.UPPER_LEFT || Globals.stampLocation == StampLocation.UPPER_RIGHT)
+                        {
+                            File.Copy(fileName, outputPath);
+                            bool header = false;
+                            bool footer = true;
+                            // Get application object
+                            Microsoft.Office.Interop.Word.Application WordApplication = new Microsoft.Office.Interop.Word.Application();
+
+                            // Get document object
+                            object Miss = System.Reflection.Missing.Value;
+                            object ReadOnly = false;
+                            object Visible = false;
+                            object OutputPath = outputPath;
+                            Microsoft.Office.Interop.Word.Document Doc = WordApplication.Documents.Open(ref OutputPath, ref Miss, ref ReadOnly, ref Miss, ref Miss, ref Miss, ref Miss, ref Miss, ref Miss, ref Miss, ref Miss, ref Visible, ref Miss, ref Miss, ref Miss, ref Miss);
+
+                            //Find out where to stamp
+                            if (Globals.stampLocation == StampLocation.CENTER_BOTTOM || Globals.stampLocation == StampLocation.LOWER_LEFT || Globals.stampLocation == StampLocation.LOWER_RIGHT)
+                            {
+                                footer = true;
+                            }
+                            else if (Globals.stampLocation == StampLocation.CENTER_TOP || Globals.stampLocation == StampLocation.UPPER_LEFT || Globals.stampLocation == StampLocation.UPPER_RIGHT)
+                            {
+                                header = true;
+                            }
+                            else
+                            {
+                                //TODO: Do something for location in Center??
+                            }
+                            foreach (Microsoft.Office.Interop.Word.Section wordSection in Doc.Sections)
+                            {
+                                Microsoft.Office.Interop.Word.Range range;
+                                if (footer)
+                                {
+                                    range = wordSection.Footers[Microsoft.Office.Interop.Word.WdHeaderFooterIndex.wdHeaderFooterPrimary].Range;
+                                }
+                                else if (header)
+                                {
+                                    range = wordSection.Headers[Microsoft.Office.Interop.Word.WdHeaderFooterIndex.wdHeaderFooterPrimary].Range;
+                                }
+                                else
+                                {
+                                    range = wordSection.Headers[Microsoft.Office.Interop.Word.WdHeaderFooterIndex.wdHeaderFooterPrimary].Range; //TODO: Change to something for centered text
+                                }
+                                range.Font.ColorIndex = Microsoft.Office.Interop.Word.WdColorIndex.wdDarkRed;
+                                range.Font.Size = Globals.font.Size;
+                                switch (Globals.batesFont)
+                                {
+                                    case BatesFont.COURIER:
+                                        range.Font.Name = "Courier";
+                                        break;
+                                    case BatesFont.HELVETICA:
+                                        range.Font.Name = "Helvetica";
+                                        break;
+                                    case BatesFont.TIMES_NEW_ROMAN:
+                                        range.Font.Name = "Times New Roman";
+                                        break;
+                                }
+                                // rng.ParagraphFormat.Alignment = Word.WdParagraphAlignment.wdAlignParagraphCenter;
+                                if (Globals.stampLocation == StampLocation.LOWER_LEFT || Globals.stampLocation == StampLocation.UPPER_LEFT)
+                                {
+                                    range.ParagraphFormat.Alignment = Microsoft.Office.Interop.Word.WdParagraphAlignment.wdAlignParagraphLeft;
+                                }
+                                else if (Globals.stampLocation == StampLocation.LOWER_RIGHT || Globals.stampLocation == StampLocation.UPPER_RIGHT)
+                                {
+                                    range.ParagraphFormat.Alignment = Microsoft.Office.Interop.Word.WdParagraphAlignment.wdAlignParagraphRight;
+                                }
+                                else if (Globals.stampLocation == StampLocation.CENTER_BOTTOM || Globals.stampLocation == StampLocation.CENTER_TOP)
+                                {
+                                    range.ParagraphFormat.Alignment = Microsoft.Office.Interop.Word.WdParagraphAlignment.wdAlignParagraphCenter;
+                                }
+                                range.Font.Bold = Globals.bold ? 1 : 0;
+                                range.Font.Italic = Globals.italic ? 1 : 0;
+                                range.Font.Glow.Transparency = Globals.stampTransparency;
+                                var batesStamp = batesPrefix + " " + ConstantNumber(currentBates, numDigits);
+                                currentBates++;
+                                range.Text = batesStamp;
+                            }
+                            Doc.Save();
+                            Doc.Close();
+                        }
+                        else  //It is centered, so create watermark
+                        {
+                            Spire.Doc.Document doc = new Spire.Doc.Document();
+                            doc.LoadFromFile(fileName);
+                            TextWatermark textWatermark = new TextWatermark();
+                            var batesStamp = batesPrefix + " " + ConstantNumber(currentBates, numDigits);
+                            currentBates++;
+                            textWatermark.Text = batesStamp;
+                            textWatermark.FontSize = Globals.font.Size;
+                            int alpha = Convert.ToInt32((Globals.stampTransparency) * 255);
+                            alpha = Math.Min(alpha, 255);
+                            alpha = Math.Max(alpha, 0);
+                            textWatermark.Color = Color.FromArgb(alpha, 0, 0, 0);
+                            textWatermark.Layout = Spire.Doc.Documents.WatermarkLayout.Horizontal;
+                            doc.Watermark = textWatermark;
+                            doc.SaveToFile(outputPath);
+                        }
                     }
                     else
                     {
@@ -993,7 +1244,7 @@ namespace PDFUtility
             }
         }
         #endregion
-        
+                
     }
 
     public partial class PDFUtility
@@ -1176,6 +1427,26 @@ namespace PDFUtility
             get { return _toStamp; }
             set { _toStamp = value; }
         }
+        private BatesFont _batesFont;
+        public BatesFont batesFont
+        {
+            get { return _batesFont; }
+            set { _batesFont = value; }
+        }
+
+        private bool _bold = true;
+        public bool bold
+        {
+            get { return _bold; }
+            set { _bold = value; }
+        }
+
+        private bool _italic = false;
+        public bool italic
+        {
+            get { return _italic; }
+            set { _italic = value; }
+        }
     }
     
     static class Globals
@@ -1300,6 +1571,13 @@ namespace PDFUtility
         {
             get { return _currentSavePath; }
             set { _currentSavePath = value; }
+        }
+
+        private static BatesFont _batesFont;
+        public static BatesFont batesFont
+        {
+            get { return _batesFont; }
+            set { _batesFont = value; }
         }
     }
 }
