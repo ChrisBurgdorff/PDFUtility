@@ -545,6 +545,8 @@ namespace PDFUtility
         private void viewHistoryToolStripMenuItem_Click(object sender, EventArgs e)
         {
             //TODO: View History
+            PDFUtilityHistory.formHistory form = new PDFUtilityHistory.formHistory();
+            form.Show();
         }
         #endregion
 
@@ -818,10 +820,13 @@ namespace PDFUtility
             iTextSharp.text.Font font = new iTextSharp.text.Font(baseFont, fontSize);
             Globals.font = font;
             //Fill in list view now
-            for (int i = 0; i < s.toStamp.Count; i++)
+            if (s.toStamp != null)
             {
-                ListViewItem item = new ListViewItem(new[] { s.toStamp[i].fileNumber, s.toStamp[i].fileName, s.toStamp[i].pageCount, "N/A", s.toStamp[i].path });
-                lstBatesFiles.Items.Add(item);
+                for (int i = 0; i < s.toStamp.Count; i++)
+                {
+                    ListViewItem item = new ListViewItem(new[] { s.toStamp[i].fileNumber, s.toStamp[i].fileName, s.toStamp[i].pageCount, "N/A", s.toStamp[i].path });
+                    lstBatesFiles.Items.Add(item);
+                }
             }
             //end list view
             txtFolderBates.Text = s.outputFolder;
@@ -1168,7 +1173,8 @@ namespace PDFUtility
                                 {
                                     range = wordSection.Headers[Microsoft.Office.Interop.Word.WdHeaderFooterIndex.wdHeaderFooterPrimary].Range; //TODO: Change to something for centered text
                                 }
-                                range.Font.ColorIndex = Microsoft.Office.Interop.Word.WdColorIndex.wdDarkRed;
+                                //Color color = Color.FromArgb(125, 255, 255, 255);
+                                range.Font.Color = Microsoft.Office.Interop.Word.WdColor.wdColorBlack;
                                 range.Font.Size = Globals.font.Size;
                                 switch (Globals.batesFont)
                                 {
@@ -1195,9 +1201,10 @@ namespace PDFUtility
                                 {
                                     range.ParagraphFormat.Alignment = Microsoft.Office.Interop.Word.WdParagraphAlignment.wdAlignParagraphCenter;
                                 }
+                                //range.Font.Fill.Transparency = 0.1f;
                                 range.Font.Bold = Globals.bold ? 1 : 0;
                                 range.Font.Italic = Globals.italic ? 1 : 0;
-                                range.Font.Glow.Transparency = Globals.stampTransparency;
+                                
                                 var batesStamp = batesPrefix + " " + ConstantNumber(currentBates, numDigits);
                                 currentBates++;
                                 range.Text = batesStamp;
@@ -1581,3 +1588,5 @@ namespace PDFUtility
         }
     }
 }
+
+
