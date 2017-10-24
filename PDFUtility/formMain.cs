@@ -57,7 +57,7 @@ namespace PDFUtility
         //Add image file formats (word docs possibly as well) - done not tested
         //Help file
         //Add message box warning when user selects SmartStamp
-        //Export history to Excel
+        //Export history to Excel - Done
         //Add hot keys
         //Constant number of digits - done not tested
         //Keep track of shit for undo
@@ -199,10 +199,14 @@ namespace PDFUtility
                     Microsoft.Office.Interop.Excel.Application app = new Microsoft.Office.Interop.Excel.Application();
                     Workbook wb = app.Workbooks.Add(XlSheetType.xlWorksheet);
                     Worksheet ws = (Worksheet)app.ActiveSheet;
+                    //Microsoft.Office.Interop.Excel.Range cells = ws.Columns("D");
+                    Microsoft.Office.Interop.Excel.Range cells = (Microsoft.Office.Interop.Excel.Range)ws.get_Range("D2").EntireColumn;
+                    // set each cell's format to Text
+                    cells.NumberFormat = "@";
                     app.Visible = false;
                     for (int j = 1; j <= lv.Columns.Count; j++)
                     {
-                        var newWidth = Math.Min(255, lv.Columns[j - 1].Width / 2);
+                        var newWidth = Math.Min(255, lv.Columns[j - 1].Width / 4);
                         ws.Columns[j].ColumnWidth = newWidth;
                         ws.Cells[1, j] = lv.Columns[j - 1].Text;
                     }
