@@ -64,7 +64,8 @@ namespace PDFUtility
         //Ask for feature ideas
         //Create installer
         //Smart Stamping for Images???
-        //Excel format everything as text first... Fucking Excel.
+        //Excel format everything as text first... Fucking Excel - Done
+        //Look into why progress bar not showing right percentage
         //Associate file extension and give icon
         //Save Shit to stamp - done, not tested
         //Get it to not write over shit
@@ -960,13 +961,20 @@ namespace PDFUtility
                                 int pages = reader.NumberOfPages;
                                 for (int j = 1; j <= pages; j++)
                                 {
+                                    if (j > 20)
+                                    {
+                                        int fakeVarForBreak = 420;
+                                    }
                                     var batesStamp = batesPrefix + " " + ConstantNumber(currentBates, numDigits);
                                     Phrase p = new Phrase(batesStamp, font);
                                     currentBates++;
                                     float height = reader.GetCropBox(j).Height;
                                     float width = reader.GetCropBox(j).Width;
+                                    float h = reader.GetPageSize(j).Height;
+                                    float w = reader.GetPageSize(j).Width;
+                                    iTextSharp.text.Rectangle rect = reader.GetPageSizeWithRotation(j);
                                     int alignment;
-                                    float printX, printY;
+                                    float printX, printY, switcherCoord;
                                     switch (Globals.stampLocation)
                                     {
                                         case StampLocation.CENTER:
@@ -1011,6 +1019,12 @@ namespace PDFUtility
                                             alignment = Element.ALIGN_RIGHT;
                                             break;
                                     }//End Switch
+                                    if (rect.Rotation == 90f || rect.Rotation == 270f)
+                                    {
+                                        switcherCoord = printX;
+                                        printX = printY;
+                                        printY = switcherCoord;
+                                    }
                                     PdfContentByte contentByte = stamper.GetOverContent(j);
                                     PdfGState gState = new PdfGState();
                                     gState.FillOpacity = Globals.stampTransparency;
