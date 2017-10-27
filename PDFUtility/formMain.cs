@@ -259,6 +259,51 @@ namespace PDFUtility
             }
             return image2;
         }
+
+        public static string NextAvailableFilename(string path)
+        {
+            string numberPattern = " ({0})";
+            
+            // Short-cut if already available
+            if (!File.Exists(path))
+                return path;
+
+            // If path has extension then insert the number pattern just before the extension and return next filename
+            if (Path.HasExtension(path))
+                return GetNextFilename(path.Insert(path.LastIndexOf(Path.GetExtension(path)), numberPattern));
+
+            // Otherwise just append the pattern to the path and return next filename
+            return GetNextFilename(path + numberPattern);
+        }
+
+        private static string GetNextFilename(string pattern)
+        {
+            string tmp = string.Format(pattern, 1);
+            if (tmp == pattern)
+                throw new ArgumentException("The pattern must include an index place-holder", "pattern");
+
+            if (!File.Exists(tmp))
+                return tmp; // short-circuit if no matches
+
+            int min = 1, max = 2; // min is inclusive, max is exclusive/untested
+
+            while (File.Exists(string.Format(pattern, max)))
+            {
+                min = max;
+                max *= 2;
+            }
+
+            while (max != min + 1)
+            {
+                int pivot = (max + min) / 2;
+                if (File.Exists(string.Format(pattern, pivot)))
+                    min = pivot;
+                else
+                    max = pivot;
+            }
+
+            return string.Format(pattern, max);
+        }
         #endregion
 
         #region Buttons (Other than Menu)
@@ -600,7 +645,7 @@ namespace PDFUtility
             else
             {
                 files = Directory.GetFiles(folderPath, "*.*");
-            }
+            }            
             IComparer comparer = new AlphanumComparator.AlphanumComparator();
             Array.Sort(files, comparer);
             path = folderPath;
@@ -613,14 +658,17 @@ namespace PDFUtility
                 fileName = Path.GetFileName(files[i]);
                 fileNumber = (1 + lstBatesFiles.Items.Count).ToString();
                 pageCount = PageCount(files[i]).ToString();
-                ListViewItem item = new ListViewItem(new[] {fileNumber, fileName, pageCount, "N/A", path });
-                lstBatesFiles.Items.Add(item);
-                UpdateStatus(i+1, files.Length, Activity.ADDING_FILES);
-                if (Globals.toStamp == null)
+                UpdateStatus(i + 1, files.Length, Activity.ADDING_FILES);
+                if (pageCount != "0")
                 {
-                    Globals.toStamp = new List<ActionToStamp>();
-                }
-                Globals.toStamp.Add(new ActionToStamp(fileNumber, fileName, pageCount, path));
+                    ListViewItem item = new ListViewItem(new[] { fileNumber, fileName, pageCount, "N/A", path });
+                    lstBatesFiles.Items.Add(item);                    
+                    if (Globals.toStamp == null)
+                    {
+                        Globals.toStamp = new List<ActionToStamp>();
+                    }
+                    Globals.toStamp.Add(new ActionToStamp(fileNumber, fileName, pageCount, path));
+                }                
             }
             FixFileList();
             ClearStatus("Click Bates Stamp to stamp these files.");
@@ -953,6 +1001,7 @@ namespace PDFUtility
                             //outputPath = outputFolder + @"\" + fileNameOnly;                            
                             System.IO.Directory.CreateDirectory(tempFolder);
                             string tempPath = tempFolder + fileNameOnly;
+                            //WRITE TO DISK
                             PdfWriter pWriter = PdfWriter.GetInstance(doc, new FileStream(tempPath, FileMode.Create, FileAccess.Write));
                             doc.Open();
                             iTextSharp.text.Image img;
@@ -982,6 +1031,7 @@ namespace PDFUtility
                             //iTextSharp.text.Font font = new iTextSharp.text.Font(baseFont, 15);     
                             iTextSharp.text.Font font = Globals.font;
                             Globals.batesPrefix = batesPrefix;
+                            //WRITE TO DISK
                             using (PdfStamper stamper = new PdfStamper(reader, new FileStream(outputPath, FileMode.Create, FileAccess.Write)))
                             {
                                 int pages = reader.NumberOfPages;
@@ -1199,10 +1249,12 @@ namespace PDFUtility
                         outputPath = outputFolder + @"\" + fileNameOnly;
                         if (smartStamp)
                         {
+                            //WRITE TO DISK
                             img2.Save(outputPath);
                         }
                         else
                         {
+                            //WRITE TO DISK
                             img.Save(outputPath);
                         }
                     }
@@ -1220,6 +1272,7 @@ namespace PDFUtility
                         object FromLocation = fileName;
                         object ToLocation = changeExtension;
                         objWordToPDF.InputLocation = FromLocation;
+                        //WRITE TO DISK
                         objWordToPDF.OutputLocation = ToLocation;
                         objWordToPDF.Word2PdfCOnversion();
 
@@ -1254,6 +1307,7 @@ namespace PDFUtility
                             doc.Close();
                             pReader.Close();
                             pWriter.Close();
+                            //WRITE TO DISK
                             fileName = tempPath;
                         }
                         //End Smart Stamping                   
@@ -1265,6 +1319,7 @@ namespace PDFUtility
                             //iTextSharp.text.Font font = new iTextSharp.text.Font(baseFont, 15);     
                             iTextSharp.text.Font font = Globals.font;
                             Globals.batesPrefix = batesPrefix;
+                            //WRITE TO DISK
                             using (PdfStamper stamper = new PdfStamper(reader, new FileStream(outputPath, FileMode.Create, FileAccess.Write)))
                             {
                                 int pages = reader.NumberOfPages;
