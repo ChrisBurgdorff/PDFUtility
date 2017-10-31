@@ -29,9 +29,11 @@ namespace PDFUtilityOptions
         }
         private void InitializeOptions()
         {
+            this.Size = new Size(719, 617);
             float transparency;
             PDFUtility.StampLocation stampLocation = Globals.stampLocation;
-
+            chkFolderStructure.Visible = false;
+            chkFolderStructure.Checked = Globals.matchFolderStructure;
             switch (stampLocation)
             {
                 case PDFUtility.StampLocation.LOWER_RIGHT:
@@ -220,6 +222,7 @@ namespace PDFUtilityOptions
             float transparency;
             transparency = (float)trackTransparency.Value / 100;
             Globals.stampTransparency = transparency;
+            Globals.matchFolderStructure = chkFolderStructure.Checked;
             switch (comboBoxLocation.SelectedIndex)
             {
                 case 0:
@@ -411,6 +414,22 @@ namespace PDFUtilityOptions
             chkItalic.Checked = false;
             chkSmartStamp.Checked = false;
             trackTransparency.Value = 100;
+        }
+
+        private void btnAdvanced_Click(object sender, EventArgs e)
+        {
+            if (btnAdvanced.Text == "Show Advanced Options")
+            {
+                this.Size = new Size(890, 617);
+                chkFolderStructure.Visible = true;
+                btnAdvanced.Text = "Hide Advanced Options";
+            }
+            else
+            {
+                this.Size = new Size(719, 617);
+                chkFolderStructure.Visible = false;
+                btnAdvanced.Text = "Show Advanced Options";
+            }
         }
     }
 }

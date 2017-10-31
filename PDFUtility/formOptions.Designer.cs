@@ -49,6 +49,8 @@
             this.comboBoxFontSize = new System.Windows.Forms.ComboBox();
             this.lblSize = new System.Windows.Forms.Label();
             this.groupBoxFont = new System.Windows.Forms.GroupBox();
+            this.btnAdvanced = new System.Windows.Forms.Button();
+            this.chkFolderStructure = new System.Windows.Forms.CheckBox();
             ((System.ComponentModel.ISupportInitialize)(this.trackTransparency)).BeginInit();
             this.groupBoxFont.SuspendLayout();
             this.SuspendLayout();
@@ -290,12 +292,37 @@
             this.groupBoxFont.TabStop = false;
             this.groupBoxFont.Text = "Font";
             // 
+            // btnAdvanced
+            // 
+            this.btnAdvanced.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.btnAdvanced.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
+            this.btnAdvanced.Location = new System.Drawing.Point(572, 9);
+            this.btnAdvanced.Name = "btnAdvanced";
+            this.btnAdvanced.Size = new System.Drawing.Size(107, 49);
+            this.btnAdvanced.TabIndex = 20;
+            this.btnAdvanced.Text = "Show Advanced Options";
+            this.btnAdvanced.UseVisualStyleBackColor = true;
+            this.btnAdvanced.Click += new System.EventHandler(this.btnAdvanced_Click);
+            // 
+            // chkFolderStructure
+            // 
+            this.chkFolderStructure.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.chkFolderStructure.AutoSize = true;
+            this.chkFolderStructure.Location = new System.Drawing.Point(716, 89);
+            this.chkFolderStructure.Name = "chkFolderStructure";
+            this.chkFolderStructure.Size = new System.Drawing.Size(129, 17);
+            this.chkFolderStructure.TabIndex = 21;
+            this.chkFolderStructure.Text = "Keep Folder Structure";
+            this.chkFolderStructure.UseVisualStyleBackColor = true;
+            // 
             // formOptions
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.SystemColors.MenuBar;
-            this.ClientSize = new System.Drawing.Size(703, 580);
+            this.ClientSize = new System.Drawing.Size(885, 580);
+            this.Controls.Add(this.chkFolderStructure);
+            this.Controls.Add(this.btnAdvanced);
             this.Controls.Add(this.groupBoxFont);
             this.Controls.Add(this.btnResetDefault);
             this.Controls.Add(this.comboBoxLocation);
@@ -344,5 +371,7 @@
         private System.Windows.Forms.ComboBox comboBoxFontSize;
         private System.Windows.Forms.Label lblSize;
         private System.Windows.Forms.GroupBox groupBoxFont;
+        private System.Windows.Forms.Button btnAdvanced;
+        private System.Windows.Forms.CheckBox chkFolderStructure;
     }
 }

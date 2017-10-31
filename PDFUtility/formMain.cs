@@ -19,6 +19,7 @@ using System.Drawing.Text;
 using Microsoft.Office.Interop.Word;
 using Spire.Doc;
 using WordToPDF;
+using TextPDF;
 
 namespace PDFUtility
 {
@@ -78,8 +79,9 @@ namespace PDFUtility
          Changes made: options changed, files added, folders added, drag and drop, bates number changed, bates prefix changed, anything stamped - don't need this
              */
         /*List of acceptable file extensions:
-         * bmp, doc, docb, docm, docx, dot, dotm, dotx, gif, jpeg, jpg, pdf, png, tif, tiff
+         * bmp, doc, docb, docm, docx, dot, dotm, dotx, gif, jpeg, jpg, pdf, png, tif, tiff, .txt
             */
+
         #region Form
         public formMain()
         {
@@ -120,6 +122,47 @@ namespace PDFUtility
                 saveToolStripMenuItem.Enabled = false;
             }
         }*/
+
+        private string GetBasePath()
+        {
+            string basePath = "";
+            List<string> paths = new List<string>();
+            for (int i = 0; i < lstBatesFiles.Items.Count; i++)
+            {
+                //lstBatesFiles.Items[i].SubItems[4].Text
+                paths.Add(lstBatesFiles.Items[i].SubItems[4].Text);
+            }
+            string[] pathArr = paths.ToArray();
+            //Find shortest string
+            int shortStringCount = pathArr[0].Length;
+            int shortStringIndex = 0;
+            for (int j = 1; j < pathArr.Length; j++)
+            {
+                if (pathArr[j].Length < shortStringCount)
+                {
+                    shortStringCount = pathArr[j].Length;
+                    shortStringIndex = j;
+                }
+            }
+            //Loop through chars of shortstring see to what extent they match everything else
+            string shortString = pathArr[shortStringIndex];
+            bool foundMismatch = false;
+            for (int k = 0; k < shortString.Length; k++)
+            {
+                for (int L = 0; L < pathArr.Length; L++)
+                {
+                    if (shortString[k] != pathArr[L][k])
+                    {
+                        foundMismatch = true;
+                    }                    
+                }
+                if (foundMismatch)
+                { break; }
+                else
+                { basePath = basePath + shortString[k]; }
+            }
+            return basePath;
+        }
 
         private void EmptyList(bool isEmpty)
         {
@@ -260,20 +303,27 @@ namespace PDFUtility
             return image2;
         }
 
-        public static string NextAvailableFilename(string path)
+        public static string NextAvailableFilename(string path, int listViewIndex)
         {
             string numberPattern = " ({0})";
-            
-            // Short-cut if already available
-            if (!File.Exists(path))
-                return path;
+            if (listViewIndex < 0 || !Globals.matchFolderStructure)
+            {
+                // Short-cut if already available
+                if (!File.Exists(path))
+                    return path;
 
-            // If path has extension then insert the number pattern just before the extension and return next filename
-            if (Path.HasExtension(path))
-                return GetNextFilename(path.Insert(path.LastIndexOf(Path.GetExtension(path)), numberPattern));
+                // If path has extension then insert the number pattern just before the extension and return next filename
+                if (Path.HasExtension(path))
+                    return GetNextFilename(path.Insert(path.LastIndexOf(Path.GetExtension(path)), numberPattern));
 
-            // Otherwise just append the pattern to the path and return next filename
-            return GetNextFilename(path + numberPattern);
+                // Otherwise just append the pattern to the path and return next filename
+                return GetNextFilename(path + numberPattern);
+            }
+            else
+            {
+                //Figure out real path if matching folders
+                return 0;
+            }
         }
 
         private static string GetNextFilename(string pattern)
@@ -326,6 +376,10 @@ namespace PDFUtility
 
         private void btnBatesStamp_Click(object sender, EventArgs e)
         {
+            if (Globals.matchFolderStructure)
+            {
+                Globals.basePath =  GetBasePath();
+            }
             PDFUtility pu = new PDFUtility();
             int startNumber;
             string fullPath = "";
@@ -451,7 +505,7 @@ namespace PDFUtility
                 if (indexOfItemUnderMouseToDrop != -1)
                 {
                     int selected = lstBatesFiles.SelectedItems.Count;
-                    MessageBox.Show(selected + "Drops before item #" + (indexOfItemUnderMouseToDrop));
+                    //MessageBox.Show(selected + "Drops before item #" + (indexOfItemUnderMouseToDrop));
                     for (j = 0; j < lstBatesFiles.SelectedItems.Count; j++)
                     {
                         var item = lstBatesFiles.SelectedItems[j];
@@ -656,12 +710,21 @@ namespace PDFUtility
             for (int i = 0; i < files.Length; i++)
             {
                 fileName = Path.GetFileName(files[i]);
+                //Check Validity
+                if (!(Path.GetExtension(fileName) == ".gif" || Path.GetExtension(fileName) == ".bmp" || Path.GetExtension(fileName) == ".jpeg" || Path.GetExtension(fileName) == ".jpg"
+                    || Path.GetExtension(fileName) == ".png" || Path.GetExtension(fileName) == ".tiff" || Path.GetExtension(fileName) == ".tif" ||
+                    Path.GetExtension(fileName) == ".doc" || Path.GetExtension(fileName) == ".dot" || Path.GetExtension(fileName) == ".docx" || Path.GetExtension(fileName) == ".docm"
+                    || Path.GetExtension(fileName) == ".dotx" || Path.GetExtension(fileName) == ".dotm" || Path.GetExtension(fileName) == ".docb" || Path.GetExtension(fileName) == ".pdf" ||
+                    Path.GetExtension(fileName) == ".txt"))
+                {
+                    MessageBox.Show("The following file " + fileName + " will not be stamped, because it is not of a valid format.", Globals.appName, MessageBoxButtons.OK);
+                }
                 fileNumber = (1 + lstBatesFiles.Items.Count).ToString();
                 pageCount = PageCount(files[i]).ToString();
                 UpdateStatus(i + 1, files.Length, Activity.ADDING_FILES);
                 if (pageCount != "0")
                 {
-                    ListViewItem item = new ListViewItem(new[] { fileNumber, fileName, pageCount, "N/A", path });
+                    ListViewItem item = new ListViewItem(new[] { fileNumber, fileName, pageCount, "N/A", Path.GetDirectoryName(files[i]) });
                     lstBatesFiles.Items.Add(item);                    
                     if (Globals.toStamp == null)
                     {
@@ -692,6 +755,15 @@ namespace PDFUtility
             for (int i = 0; i < files.Length; i++)
             {
                 fileName = Path.GetFileName(files[i]);
+                //Check Validity
+                if (!(Path.GetExtension(fileName) == ".gif" || Path.GetExtension(fileName) == ".bmp" || Path.GetExtension(fileName) == ".jpeg" || Path.GetExtension(fileName) == ".jpg"
+                    || Path.GetExtension(fileName) == ".png" || Path.GetExtension(fileName) == ".tiff" || Path.GetExtension(fileName) == ".tif" ||
+                    Path.GetExtension(fileName) == ".doc" || Path.GetExtension(fileName) == ".dot" || Path.GetExtension(fileName) == ".docx" || Path.GetExtension(fileName) == ".docm"
+                    || Path.GetExtension(fileName) == ".dotx" || Path.GetExtension(fileName) == ".dotm" || Path.GetExtension(fileName) == ".docb" || Path.GetExtension(fileName) == ".pdf" ||
+                    Path.GetExtension(fileName) == ".txt"))
+                {
+                    MessageBox.Show("The following file " + fileName + " will not be stamped, because it is not of a valid format.", Globals.appName, MessageBoxButtons.OK);
+                }
                 fileNumber = (1 + lstBatesFiles.Items.Count).ToString();
                 pageCount = PageCount(files[i]).ToString();
                 path = Path.GetDirectoryName(files[i]);
@@ -934,6 +1006,25 @@ namespace PDFUtility
             Doc.Close();
             return PagesCount;
         }
+        public int PageCountText(string fileName)
+        {
+            //FIX THIS
+            int pageCount = 0;
+            string tempFolder = AppDomain.CurrentDomain.BaseDirectory + @"TempTxt\";
+            string fileNameOnly = Path.GetFileName(fileName);
+            System.IO.Directory.CreateDirectory(tempFolder);
+            //fileName = tempFolder + fileNameOnly;
+            //TXT, convert to pdf first then stamp
+            string fileExtention = Path.GetExtension(fileName);
+            //Might need to change this, replaces every instance of .pdf in path, might be multiple?
+            string changeExtension = (tempFolder + fileNameOnly).Replace(fileExtention, ".pdf");
+            changeExtension = NextAvailableFilename(changeExtension, -1);
+            TextPDF.PdfWriter txtPdfWriter = new TextPDF.PdfWriter(842.0f, 1190.0f, 10.0f, 10.0f);
+            txtPdfWriter.OutputStreamPath = changeExtension;
+            txtPdfWriter.Write(fileName);
+            pageCount = PageCount(changeExtension);
+            return pageCount;
+        }
         public int PageCount(string fileName)
         {
             int pageCount = 0;
@@ -953,6 +1044,10 @@ namespace PDFUtility
                         || Path.GetExtension(fileName) == ".png" || Path.GetExtension(fileName) == ".tiff" || Path.GetExtension(fileName) == ".tif")
             {
                 pageCount = 1;
+            }
+            else if (Path.GetExtension(fileName) == ".txt")
+            {
+                pageCount = PageCountText(fileName);
             }
             return pageCount;
         }
@@ -998,11 +1093,12 @@ namespace PDFUtility
                             int numPages = pReader.NumberOfPages;
                             iTextSharp.text.Document doc = new iTextSharp.text.Document();
                             fileNameOnly = Path.GetFileName(fileName);
-                            //outputPath = outputFolder + @"\" + fileNameOnly;                            
+                            //outputPath = outputFolder + @"\" + fileNameOnly;   
                             System.IO.Directory.CreateDirectory(tempFolder);
                             string tempPath = tempFolder + fileNameOnly;
+                            tempPath = NextAvailableFilename(tempPath, -1);
                             //WRITE TO DISK
-                            PdfWriter pWriter = PdfWriter.GetInstance(doc, new FileStream(tempPath, FileMode.Create, FileAccess.Write));
+                            iTextSharp.text.pdf.PdfWriter pWriter = iTextSharp.text.pdf.PdfWriter.GetInstance(doc, new FileStream(tempPath, FileMode.Create, FileAccess.Write));
                             doc.Open();
                             iTextSharp.text.Image img;
                             PdfImportedPage page;
@@ -1031,6 +1127,7 @@ namespace PDFUtility
                             //iTextSharp.text.Font font = new iTextSharp.text.Font(baseFont, 15);     
                             iTextSharp.text.Font font = Globals.font;
                             Globals.batesPrefix = batesPrefix;
+                            outputPath = NextAvailableFilename(outputPath, i);
                             //WRITE TO DISK
                             using (PdfStamper stamper = new PdfStamper(reader, new FileStream(outputPath, FileMode.Create, FileAccess.Write)))
                             {
@@ -1058,7 +1155,7 @@ namespace PDFUtility
                                         width = switcherCoord;
                                     }
                                     int alignment;
-                                    
+
                                     switch (Globals.stampLocation)
                                     {
                                         case StampLocation.CENTER:
@@ -1103,7 +1200,7 @@ namespace PDFUtility
                                             alignment = Element.ALIGN_RIGHT;
                                             break;
                                     }//End Switch
-                                    
+
                                     PdfContentByte contentByte = stamper.GetOverContent(j);
                                     PdfGState gState = new PdfGState();
                                     gState.FillOpacity = Globals.stampTransparency;
@@ -1122,7 +1219,7 @@ namespace PDFUtility
                     {
                         //Image stamping
                         string batesStamp = batesPrefix + " " + ConstantNumber(currentBates, numDigits);
-                        currentBates++;                        
+                        currentBates++;
                         PointF loc = new PointF(10f, 10f); //TODO: Set Location
                         Bitmap img = (Bitmap)System.Drawing.Image.FromFile(fileName);
                         //variables needed for SmartStamping
@@ -1137,7 +1234,7 @@ namespace PDFUtility
                         alpha = Math.Min(alpha, 255);
                         alpha = Math.Max(alpha, 0);
                         SolidBrush brush = new SolidBrush(Color.FromArgb(alpha, 0, 0, 0));
-                        RectangleF entireImage = new RectangleF(0, 0, img.Width, img.Height);                        
+                        RectangleF entireImage = new RectangleF(0, 0, img.Width, img.Height);
 
                         using (Graphics graphics = Graphics.FromImage(img))
                         {
@@ -1231,7 +1328,7 @@ namespace PDFUtility
                             else
                             {
                                 style = FontStyle.Regular;
-                            }                       
+                            }
                             using (System.Drawing.Font imageFont = new System.Drawing.Font(fam, Globals.font.Size, style)) //TODO: Select right font - Done, I think
                             {
                                 if (smartStamp)
@@ -1250,11 +1347,13 @@ namespace PDFUtility
                         if (smartStamp)
                         {
                             //WRITE TO DISK
+                            outputPath = NextAvailableFilename(outputPath, i);
                             img2.Save(outputPath);
                         }
                         else
                         {
                             //WRITE TO DISK
+                            outputPath = NextAvailableFilename(outputPath, i);
                             img.Save(outputPath);
                         }
                     }
@@ -1265,18 +1364,19 @@ namespace PDFUtility
                         Word2Pdf objWordToPDF = new Word2Pdf();
 
                         string fileExtention = Path.GetExtension(fileName);
-                        
+
                         //fileNameOnly = Path.GetFileName(fileName);
                         //Might need to change this, replaces every instance of .pdf in path, might be multiple?
                         string changeExtension = fileName.Replace(fileExtention, ".pdf");
+                        changeExtension = NextAvailableFilename(changeExtension, -1);
                         object FromLocation = fileName;
                         object ToLocation = changeExtension;
                         objWordToPDF.InputLocation = FromLocation;
-                        //WRITE TO DISK
+                        //WRITE TO DISK                        
                         objWordToPDF.OutputLocation = ToLocation;
                         objWordToPDF.Word2PdfCOnversion();
 
-                        fileName = changeExtension;
+                        fileName = changeExtension;                        
 
                         //Copy of entire PDF Stamping code using the newly converted/created file:
                         //Smart Stamping
@@ -1289,7 +1389,8 @@ namespace PDFUtility
                             //outputPath = outputFolder + @"\" + fileNameOnly;                            
                             System.IO.Directory.CreateDirectory(tempFolder);
                             string tempPath = tempFolder + fileNameOnly;
-                            PdfWriter pWriter = PdfWriter.GetInstance(doc, new FileStream(tempPath, FileMode.Create, FileAccess.Write));
+                            tempPath = NextAvailableFilename(tempPath, -1);
+                            iTextSharp.text.pdf.PdfWriter pWriter = iTextSharp.text.pdf.PdfWriter.GetInstance(doc, new FileStream(tempPath, FileMode.Create, FileAccess.Write));
                             doc.Open();
                             iTextSharp.text.Image img;
                             PdfImportedPage page;
@@ -1320,6 +1421,7 @@ namespace PDFUtility
                             iTextSharp.text.Font font = Globals.font;
                             Globals.batesPrefix = batesPrefix;
                             //WRITE TO DISK
+                            outputPath = NextAvailableFilename(outputPath, i);
                             using (PdfStamper stamper = new PdfStamper(reader, new FileStream(outputPath, FileMode.Create, FileAccess.Write)))
                             {
                                 int pages = reader.NumberOfPages;
@@ -1512,7 +1614,148 @@ namespace PDFUtility
                             doc.Watermark = textWatermark;
                             doc.SaveToFile(outputPath);
                         }    */
-                    }  
+                    }
+                    else if (Path.GetExtension(fileName) == ".txt")
+                    {
+                        //TXT, convert to pdf first then stamp
+                        string fileExtention = Path.GetExtension(fileName);
+                        //Might need to change this, replaces every instance of .pdf in path, might be multiple?
+                        string changeExtension = fileName.Replace(fileExtention, ".pdf");
+                        changeExtension = NextAvailableFilename(changeExtension, -1);
+                        TextPDF.PdfWriter txtPdfWriter = new TextPDF.PdfWriter(842.0f, 1190.0f, 10.0f, 10.0f);
+                        txtPdfWriter.OutputStreamPath = changeExtension;
+                        txtPdfWriter.Write(fileName);
+
+                        fileName = changeExtension;
+                        //Copy of entire PDF Stamping code using the newly converted/created file:
+                        //Smart Stamping
+                        if (smartStamp)
+                        {
+                            PdfReader pReader = new PdfReader(fileName);
+                            int numPages = pReader.NumberOfPages;
+                            iTextSharp.text.Document doc = new iTextSharp.text.Document();
+                            fileNameOnly = Path.GetFileName(fileName);
+                            //outputPath = outputFolder + @"\" + fileNameOnly;                            
+                            System.IO.Directory.CreateDirectory(tempFolder);
+                            string tempPath = tempFolder + fileNameOnly;
+                            tempPath = NextAvailableFilename(tempPath, -1);
+                            iTextSharp.text.pdf.PdfWriter pWriter = iTextSharp.text.pdf.PdfWriter.GetInstance(doc, new FileStream(tempPath, FileMode.Create, FileAccess.Write));
+                            doc.Open();
+                            iTextSharp.text.Image img;
+                            PdfImportedPage page;
+                            PdfContentByte directContent = new PdfContentByte(pWriter);
+                            for (int k = 1; k <= numPages; k++)
+                            {
+                                page = pWriter.GetImportedPage(pReader, k);
+                                img = iTextSharp.text.Image.GetInstance(page);
+                                img.ScaleAbsolute(PageSize.A4.Width - 72, PageSize.A4.Height - 72);
+                                img.SetAbsolutePosition(36, 36);
+                                directContent.AddImage(img);
+                                doc.Add(img);
+                                doc.NewPage();
+                            }
+                            doc.Close();
+                            pReader.Close();
+                            pWriter.Close();
+                            //WRITE TO DISK
+                            fileName = tempPath;
+                        }
+                        //End Smart Stamping                   
+                        using (var reader = new PdfReader(fileName))
+                        {
+                            fileNameOnly = Path.GetFileName(fileName);
+                            outputPath = outputFolder + @"\" + fileNameOnly;
+                            //var baseFont = BaseFont.CreateFont(BaseFont.HELVETICA_BOLD, BaseFont.CP1252, BaseFont.NOT_EMBEDDED);
+                            //iTextSharp.text.Font font = new iTextSharp.text.Font(baseFont, 15);     
+                            iTextSharp.text.Font font = Globals.font;
+                            Globals.batesPrefix = batesPrefix;
+                            //WRITE TO DISK
+                            outputPath = NextAvailableFilename(outputPath, i);
+                            using (PdfStamper stamper = new PdfStamper(reader, new FileStream(outputPath, FileMode.Create, FileAccess.Write)))
+                            {
+                                int pages = reader.NumberOfPages;
+                                for (int j = 1; j <= pages; j++)
+                                {
+                                    /*
+                                    if (j > 20)
+                                    {
+                                        int fakeVarForBreak = 420;
+                                    }  */
+                                    var batesStamp = batesPrefix + " " + ConstantNumber(currentBates, numDigits);
+                                    Phrase p = new Phrase(batesStamp, font);
+                                    currentBates++;
+                                    float height = reader.GetCropBox(j).Height;
+                                    float width = reader.GetCropBox(j).Width;
+                                    float h = reader.GetPageSize(j).Height;
+                                    float w = reader.GetPageSize(j).Width;
+                                    iTextSharp.text.Rectangle rect = reader.GetPageSizeWithRotation(j);
+                                    float printX, printY, switcherCoord;
+                                    if (rect.Rotation == 90f || rect.Rotation == 270f)
+                                    {
+                                        switcherCoord = height;
+                                        height = width;
+                                        width = switcherCoord;
+                                    }
+                                    int alignment;
+
+                                    switch (Globals.stampLocation)
+                                    {
+                                        case StampLocation.CENTER:
+                                            printX = width / 2;
+                                            printY = height / 2;
+                                            alignment = Element.ALIGN_CENTER;
+                                            break;
+                                        case StampLocation.CENTER_BOTTOM:
+                                            printX = width / 2;
+                                            printY = 20;
+                                            alignment = Element.ALIGN_CENTER;
+                                            break;
+                                        case StampLocation.CENTER_TOP:
+                                            printX = width / 2;
+                                            printY = height - 20;
+                                            alignment = Element.ALIGN_CENTER;
+                                            break;
+                                        case StampLocation.LOWER_LEFT:
+                                            printX = 20;
+                                            printY = 20;
+                                            alignment = Element.ALIGN_LEFT;
+                                            break;
+                                        case StampLocation.LOWER_RIGHT:
+                                            printX = width - 20;
+                                            printY = 20;
+                                            alignment = Element.ALIGN_RIGHT;
+                                            break;
+                                        case StampLocation.UPPER_LEFT:
+                                            printX = 20;
+                                            printY = height - 20;
+                                            alignment = Element.ALIGN_LEFT;
+                                            break;
+                                        case StampLocation.UPPER_RIGHT:
+                                            printX = width - 20;
+                                            printY = height - 20;
+                                            alignment = Element.ALIGN_RIGHT;
+                                            break;
+                                        default:
+                                            //Default: lower right
+                                            printX = width - 20;
+                                            printY = 20;
+                                            alignment = Element.ALIGN_RIGHT;
+                                            break;
+                                    }//End Switch
+
+                                    PdfContentByte contentByte = stamper.GetOverContent(j);
+                                    PdfGState gState = new PdfGState();
+                                    gState.FillOpacity = Globals.stampTransparency;
+                                    contentByte.SetGState(gState);
+                                    ColumnText.ShowTextAligned(contentByte, alignment, p, printX, printY, 0);
+                                }//End For
+                            }//End using
+                            reader.Close();
+                            string batesRange = (currentBates - reader.NumberOfPages).ToString() + "-" + (currentBates - 1).ToString();
+                            Action action = new Action(fileNameOnly, fileName, fileNameOnly, outputPath, batesRange, batesPrefix, DateTime.Now);
+                            Globals.history.Add(action);
+                        }
+                        }
                     else
                     {
                         //TODO: Invalid file type
@@ -1522,11 +1765,20 @@ namespace PDFUtility
                 form1.ClearList();
                 if (smartStamp)
                 {
+                    //Clear Temp folder for SmartStamp
                     System.IO.DirectoryInfo dir = new DirectoryInfo(tempFolder);
                     foreach (FileInfo file in dir.GetFiles())
                     {
                         file.Delete();
                     }
+                }
+                //Clear temp folder for txt files, "create" in case it doesn't exist
+                string tempTextFolder = AppDomain.CurrentDomain.BaseDirectory + @"TempTxt\";
+                System.IO.Directory.CreateDirectory(tempTextFolder);
+                System.IO.DirectoryInfo direct = new DirectoryInfo(tempFolder);
+                foreach (FileInfo file in direct.GetFiles())
+                {
+                    file.Delete();
                 }
                 Globals.currentBates = currentBates;
                 form1.UpdateCurrentBatesNumber(currentBates, batesPrefix);
@@ -1868,6 +2120,20 @@ namespace PDFUtility
         {
             get { return _batesFont; }
             set { _batesFont = value; }
+        }
+
+        private static bool _matchFolderStructure;
+        public static bool matchFolderStructure
+        {
+            get { return _matchFolderStructure; }
+            set { _matchFolderStructure = value; }
+        }
+
+        private static string _basePath;
+        public static string basePath
+        {
+            get { return _basePath; }
+            set { _basePath = value; }
         }
     }
 }
