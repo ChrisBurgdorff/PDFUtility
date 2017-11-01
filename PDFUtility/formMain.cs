@@ -70,6 +70,10 @@ namespace PDFUtility
         //Excel format everything as text first... Fucking Excel - Done
         //Look into why progress bar not showing right percentage
         //Associate file extension and give icon
+        //"Garbage collect" after conversion, doc and pdf files showing in original folder
+        //Alphanum comparator doesn't handle more than 32 bit integers - Disabled for now, but either change it to 64 bit or wrap in a try-catch.
+        //Extend margins on text - PDF conversion
+        //blank page on text files?  WTF
         //Save Shit to stamp - done, not tested
         //Get it to not write over shit
         //Buy template and make landing page - done
@@ -161,6 +165,9 @@ namespace PDFUtility
                 else
                 { basePath = basePath + shortString[k]; }
             }
+            //Ensure basePath ends with last folder (not in the middle of a folder name)
+            int pos = basePath.LastIndexOf(@"\") + 1;
+            basePath = basePath.Substring(0, basePath.Length - (basePath.Length - pos));
             return basePath;
         }
 
@@ -303,7 +310,7 @@ namespace PDFUtility
             return image2;
         }
 
-        public static string NextAvailableFilename(string path, int listViewIndex)
+        public string NextAvailableFilename(string path, int listViewIndex)
         {
             string numberPattern = " ({0})";
             if (listViewIndex < 0 || !Globals.matchFolderStructure)
@@ -322,7 +329,20 @@ namespace PDFUtility
             else
             {
                 //Figure out real path if matching folders
-                return 0;
+                string basePath = Globals.basePath;
+                string outputFolder = Globals.outputFolder;
+                string relativePath = lstBatesFiles.Items[listViewIndex].SubItems[4].Text.Replace(basePath, "");
+                string fileName = Path.GetFileName(path);
+                string fullPath = outputFolder + @"\" + relativePath + @"\" + fileName;
+                //Create new relative path if it doesn't exist
+                System.IO.Directory.CreateDirectory(outputFolder + @"\" + relativePath);
+                if (!File.Exists(fullPath))
+                    return fullPath;
+
+                if (Path.HasExtension(fullPath))
+                    return GetNextFilename(fullPath.Insert(fullPath.LastIndexOf(Path.GetExtension(fullPath)), numberPattern));
+
+                return GetNextFilename(fullPath + numberPattern);
             }
         }
 
@@ -701,7 +721,8 @@ namespace PDFUtility
                 files = Directory.GetFiles(folderPath, "*.*");
             }            
             IComparer comparer = new AlphanumComparator.AlphanumComparator();
-            Array.Sort(files, comparer);
+            //Array.Sort(files, comparer);
+            Array.Sort(files);
             path = folderPath;
             if (files.Length > 0)
             {
@@ -777,6 +798,14 @@ namespace PDFUtility
                 Globals.toStamp.Add(new ActionToStamp(fileNumber, fileName, pageCount, path));
             }
             FixFileList();
+            //Clear temp folder for txt files, "create" in case it doesn't exist
+            string tempTextFolder = AppDomain.CurrentDomain.BaseDirectory + @"TempTxt\";
+            System.IO.Directory.CreateDirectory(tempTextFolder);
+            System.IO.DirectoryInfo direct = new DirectoryInfo(tempTextFolder);
+            foreach (FileInfo file in direct.GetFiles())
+            {
+                file.Delete();
+            }
             ClearStatus("Click Bates Stamp to stamp these files.");
         }
         #endregion
@@ -1004,6 +1033,7 @@ namespace PDFUtility
             Microsoft.Office.Interop.Word.WdStatistic PagesCountStat = Microsoft.Office.Interop.Word.WdStatistic.wdStatisticPages;
             int PagesCount = Doc.ComputeStatistics(PagesCountStat, ref Miss);
             Doc.Close();
+            WordApplication.Quit();
             return PagesCount;
         }
         public int PageCountText(string fileName)
@@ -1019,7 +1049,7 @@ namespace PDFUtility
             //Might need to change this, replaces every instance of .pdf in path, might be multiple?
             string changeExtension = (tempFolder + fileNameOnly).Replace(fileExtention, ".pdf");
             changeExtension = NextAvailableFilename(changeExtension, -1);
-            TextPDF.PdfWriter txtPdfWriter = new TextPDF.PdfWriter(842.0f, 1190.0f, 10.0f, 10.0f);
+            TextPDF.PdfWriter txtPdfWriter = new TextPDF.PdfWriter(842.0f, 1190.0f, 72.0f, 10.0f);
             txtPdfWriter.OutputStreamPath = changeExtension;
             txtPdfWriter.Write(fileName);
             pageCount = PageCount(changeExtension);
@@ -1356,6 +1386,10 @@ namespace PDFUtility
                             outputPath = NextAvailableFilename(outputPath, i);
                             img.Save(outputPath);
                         }
+                        string batesRange = currentBates.ToString() + "-" + currentBates.ToString();
+
+                        Action action = new Action(lstBatesFiles.Items[i].SubItems[1].Text, fileName, fileNameOnly, outputPath, batesRange, batesPrefix, DateTime.Now);
+                        Globals.history.Add(action);
                     }
                     else if (Path.GetExtension(fileName) == ".doc" || Path.GetExtension(fileName) == ".dot" || Path.GetExtension(fileName) == ".docx" || Path.GetExtension(fileName) == ".docm"
                         || Path.GetExtension(fileName) == ".dotx" || Path.GetExtension(fileName) == ".dotm" || Path.GetExtension(fileName) == ".docb")
@@ -1503,7 +1537,8 @@ namespace PDFUtility
                             }//End using
                             reader.Close();
                             string batesRange = (currentBates - reader.NumberOfPages).ToString() + "-" + (currentBates - 1).ToString();
-                            Action action = new Action(fileNameOnly, fileName, fileNameOnly, outputPath, batesRange, batesPrefix, DateTime.Now);
+                            
+                            Action action = new Action(lstBatesFiles.Items[i].SubItems[1].Text, fileName, fileNameOnly, outputPath, batesRange, batesPrefix, DateTime.Now);
                             Globals.history.Add(action);
                         }//End using
                         /*
@@ -1622,7 +1657,7 @@ namespace PDFUtility
                         //Might need to change this, replaces every instance of .pdf in path, might be multiple?
                         string changeExtension = fileName.Replace(fileExtention, ".pdf");
                         changeExtension = NextAvailableFilename(changeExtension, -1);
-                        TextPDF.PdfWriter txtPdfWriter = new TextPDF.PdfWriter(842.0f, 1190.0f, 10.0f, 10.0f);
+                        TextPDF.PdfWriter txtPdfWriter = new TextPDF.PdfWriter(842.0f, 1190.0f, 72.0f, 10.0f);
                         txtPdfWriter.OutputStreamPath = changeExtension;
                         txtPdfWriter.Write(fileName);
 
@@ -1752,7 +1787,8 @@ namespace PDFUtility
                             }//End using
                             reader.Close();
                             string batesRange = (currentBates - reader.NumberOfPages).ToString() + "-" + (currentBates - 1).ToString();
-                            Action action = new Action(fileNameOnly, fileName, fileNameOnly, outputPath, batesRange, batesPrefix, DateTime.Now);
+
+                            Action action = new Action(lstBatesFiles.Items[i].SubItems[1].Text, fileName, fileNameOnly, outputPath, batesRange, batesPrefix, DateTime.Now);
                             Globals.history.Add(action);
                         }
                         }
@@ -1761,7 +1797,14 @@ namespace PDFUtility
                         //TODO: Invalid file type
                     }//End if   
                 }//End For
-                form1.ClearStatus(files.Length + " Files Stamped to " + Path.GetDirectoryName(outputPath) + @"\");
+                if (Globals.matchFolderStructure)
+                {
+                    form1.ClearStatus(files.Length + " Files Stamped to " + Path.GetDirectoryName(Globals.basePath) + @"\");
+                }
+                else
+                {
+                    form1.ClearStatus(files.Length + " Files Stamped to " + Path.GetDirectoryName(outputPath) + @"\");
+                }                
                 form1.ClearList();
                 if (smartStamp)
                 {
@@ -1775,7 +1818,7 @@ namespace PDFUtility
                 //Clear temp folder for txt files, "create" in case it doesn't exist
                 string tempTextFolder = AppDomain.CurrentDomain.BaseDirectory + @"TempTxt\";
                 System.IO.Directory.CreateDirectory(tempTextFolder);
-                System.IO.DirectoryInfo direct = new DirectoryInfo(tempFolder);
+                System.IO.DirectoryInfo direct = new DirectoryInfo(tempTextFolder);
                 foreach (FileInfo file in direct.GetFiles())
                 {
                     file.Delete();

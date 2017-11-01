@@ -294,7 +294,6 @@
             // 
             // btnAdvanced
             // 
-            this.btnAdvanced.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.btnAdvanced.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
             this.btnAdvanced.Location = new System.Drawing.Point(572, 9);
             this.btnAdvanced.Name = "btnAdvanced";
