@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using PDFUtility;
 using iTextSharp.text.pdf;
+using System.IO;
 
 namespace PDFUtilityOptions
 {
@@ -33,6 +34,11 @@ namespace PDFUtilityOptions
             float transparency;
             PDFUtility.StampLocation stampLocation = Globals.stampLocation;
             chkFolderStructure.Visible = false;
+            chkIgnoreAlerts.Visible = false;
+            chkSmartImages.Visible = false;
+            txtDelimeter.Visible = false;
+            lblDelimeter.Visible = false;
+            btnCheckExtensions.Visible = false;
             chkFolderStructure.Checked = Globals.matchFolderStructure;
             switch (stampLocation)
             {
@@ -223,6 +229,7 @@ namespace PDFUtilityOptions
             transparency = (float)trackTransparency.Value / 100;
             Globals.stampTransparency = transparency;
             Globals.matchFolderStructure = chkFolderStructure.Checked;
+            
             switch (comboBoxLocation.SelectedIndex)
             {
                 case 0:
@@ -325,7 +332,14 @@ namespace PDFUtilityOptions
             }
             //var base1 = BaseFont.CreateFont();
             //var baseFont =  BaseFont.CreateFont(BaseFont.HELVETICA_BOLD, BaseFont.CP1252, BaseFont.NOT_EMBEDDED);
-            
+
+            Globals.ignoreAlerts = chkIgnoreAlerts.Checked;
+            Globals.smartImages = chkSmartImages.Checked;
+            if (txtDelimeter.Text != "")
+            {
+                Globals.delimeter = txtDelimeter.Text;
+            }
+
             iTextSharp.text.Font font = new iTextSharp.text.Font(baseFont, fontSize);
             Globals.font = font;
             Globals.bold = bold;
@@ -422,13 +436,64 @@ namespace PDFUtilityOptions
             {
                 this.Size = new Size(890, 617);
                 chkFolderStructure.Visible = true;
+                chkIgnoreAlerts.Visible = true;
+                chkSmartImages.Visible = true;
+                txtDelimeter.Visible = true;
+                lblDelimeter.Visible = true;
+                btnCheckExtensions.Visible = true;
                 btnAdvanced.Text = "Hide Advanced Options";
             }
             else
             {
                 this.Size = new Size(719, 617);
                 chkFolderStructure.Visible = false;
+                chkIgnoreAlerts.Visible = false;
+                chkSmartImages.Visible = false;
+                txtDelimeter.Visible = false;
+                lblDelimeter.Visible = false;
+                btnCheckExtensions.Visible = false;
                 btnAdvanced.Text = "Show Advanced Options";
+            }
+        }
+
+        private void btnCheckExtensions_Click(object sender, EventArgs e)
+        {
+            /*List of acceptable file extensions:
+         * bmp, doc, docb, docm, docx, dot, dotm, dotx, gif, jpeg, jpg, pdf, png, tif, tiff, .txt
+            */
+            FolderBrowserDialog dialogFolder = new FolderBrowserDialog();
+            dialogFolder.Description = "Select Folder To Verify:";
+            List<string> badFiles = new List<string>();
+            string badFilesList = "";
+            if (dialogFolder.ShowDialog() == DialogResult.OK)
+            {
+                var folder = dialogFolder.SelectedPath;
+                //NEW
+                string[] files;
+                files = Directory.GetFiles(folder, "*.*", SearchOption.AllDirectories);
+                for (int i = 0; i < files.Length; i++)
+                {
+                    if (!(Path.GetExtension(files[i]) == ".bmp" || Path.GetExtension(files[i]) == ".doc" || Path.GetExtension(files[i]) == ".docb" || Path.GetExtension(files[i]) == ".docm" ||
+                        Path.GetExtension(files[i]) == ".docx" || Path.GetExtension(files[i]) == ".dot" || Path.GetExtension(files[i]) == ".dotm" || Path.GetExtension(files[i]) == ".dotx" ||
+                        Path.GetExtension(files[i]) == ".gif" || Path.GetExtension(files[i]) == ".jpeg" || Path.GetExtension(files[i]) == ".jpg" || Path.GetExtension(files[i]) == ".pdf" ||
+                        Path.GetExtension(files[i]) == ".png" || Path.GetExtension(files[i]) == ".tif" || Path.GetExtension(files[i]) == ".tiff" || Path.GetExtension(files[i]) == ".txt"))
+                    {
+                        badFiles.Add(files[i]);
+                    }
+                }
+                if (badFiles.Count == 0)
+                {
+                    MessageBox.Show("These files are all of the correct format", Globals.appName, MessageBoxButtons.OK);
+                }
+                else
+                {
+                    string[] badFilesArray = badFiles.ToArray();
+                    for (int j = 0; j < badFilesArray.Length; j++)
+                    {
+                        badFilesList = badFilesList + badFilesArray[j] + "\n";
+                    }
+                    MessageBox.Show("The following files will not be stamped: \n" + badFilesList, Globals.appName, MessageBoxButtons.OK);
+                }
             }
         }
     }
