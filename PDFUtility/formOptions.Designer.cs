@@ -56,6 +56,7 @@
             this.btnCheckExtensions = new System.Windows.Forms.Button();
             this.txtDelimeter = new System.Windows.Forms.TextBox();
             this.lblDelimeter = new System.Windows.Forms.Label();
+            this.chkConvertOnly = new System.Windows.Forms.CheckBox();
             ((System.ComponentModel.ISupportInitialize)(this.trackTransparency)).BeginInit();
             this.groupBoxFont.SuspendLayout();
             this.SuspendLayout();
@@ -368,12 +369,23 @@
             this.lblDelimeter.TabIndex = 26;
             this.lblDelimeter.Text = "Delimeter:";
             // 
+            // chkConvertOnly
+            // 
+            this.chkConvertOnly.AutoSize = true;
+            this.chkConvertOnly.Location = new System.Drawing.Point(716, 53);
+            this.chkConvertOnly.Name = "chkConvertOnly";
+            this.chkConvertOnly.Size = new System.Drawing.Size(87, 17);
+            this.chkConvertOnly.TabIndex = 27;
+            this.chkConvertOnly.Text = "Convert Only";
+            this.chkConvertOnly.UseVisualStyleBackColor = true;
+            // 
             // formOptions
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.SystemColors.MenuBar;
             this.ClientSize = new System.Drawing.Size(885, 580);
+            this.Controls.Add(this.chkConvertOnly);
             this.Controls.Add(this.lblDelimeter);
             this.Controls.Add(this.txtDelimeter);
             this.Controls.Add(this.btnCheckExtensions);
@@ -436,5 +448,6 @@
         private System.Windows.Forms.Button btnCheckExtensions;
         private System.Windows.Forms.TextBox txtDelimeter;
         private System.Windows.Forms.Label lblDelimeter;
+        private System.Windows.Forms.CheckBox chkConvertOnly;
     }
 }

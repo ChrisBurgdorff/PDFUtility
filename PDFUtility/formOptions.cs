@@ -39,6 +39,7 @@ namespace PDFUtilityOptions
             txtDelimeter.Visible = false;
             lblDelimeter.Visible = false;
             btnCheckExtensions.Visible = false;
+            chkConvertOnly.Visible = false;
             chkFolderStructure.Checked = Globals.matchFolderStructure;
             switch (stampLocation)
             {
@@ -333,11 +334,16 @@ namespace PDFUtilityOptions
             //var base1 = BaseFont.CreateFont();
             //var baseFont =  BaseFont.CreateFont(BaseFont.HELVETICA_BOLD, BaseFont.CP1252, BaseFont.NOT_EMBEDDED);
 
+            Globals.convertOnly = chkConvertOnly.Checked;
             Globals.ignoreAlerts = chkIgnoreAlerts.Checked;
             Globals.smartImages = chkSmartImages.Checked;
             if (txtDelimeter.Text != "")
             {
                 Globals.delimeter = txtDelimeter.Text;
+            }
+            else
+            {
+                Globals.delimeter = " ";
             }
 
             iTextSharp.text.Font font = new iTextSharp.text.Font(baseFont, fontSize);
@@ -441,11 +447,13 @@ namespace PDFUtilityOptions
                 txtDelimeter.Visible = true;
                 lblDelimeter.Visible = true;
                 btnCheckExtensions.Visible = true;
+                chkConvertOnly.Visible = true;
                 btnAdvanced.Text = "Hide Advanced Options";
             }
             else
             {
                 this.Size = new Size(719, 617);
+                chkConvertOnly.Visible = false;
                 chkFolderStructure.Visible = false;
                 chkIgnoreAlerts.Visible = false;
                 chkSmartImages.Visible = false;

@@ -480,7 +480,14 @@ namespace PDFUtility
                         includeSubfolders = true;
                     }
                 }
-                AddFolder(folder, includeSubfolders);
+                if (!Globals.convertOnly)
+                {
+                    AddFolder(folder, includeSubfolders);
+                }
+                else
+                {
+                    ConvertFiles(folder, includeSubfolders);
+                }
             }
         }
 
@@ -1031,8 +1038,131 @@ namespace PDFUtility
             return response;
         }
         #endregion
-                
+
         #region Bates Stamping
+        public void ConvertFiles(string folderPath, bool includeSubfolders)
+        {
+            
+            EmptyList(false);
+            string[] files;
+            string path;
+            string fileName;
+            bool outputGood = false;
+            string outputPath = "";
+            string outputFolder = Globals.outputFolder;
+            string fileNameOnly = "";
+            string fileNumber;
+            int fileNumberInt = 1;
+            string pageCount = "N/A";
+            string unConverted = "";
+            //this.lstBatesFiles.View = System.Windows.Forms.View.Details;
+            if (includeSubfolders)
+            {
+                files = Directory.GetFiles(folderPath, "*.*", SearchOption.AllDirectories);
+            }
+            else
+            {
+                files = Directory.GetFiles(folderPath, "*.*");
+            }
+            path = folderPath;
+            if (!Directory.Exists(outputFolder))
+            {
+                if (MessageBox.Show("The output folder does not exist.  Do you want to create it?", Globals.appName, MessageBoxButtons.YesNo) == DialogResult.Yes)
+                {
+                    System.IO.Directory.CreateDirectory(outputFolder);
+                    outputGood = true;
+                }
+            }
+            else
+            {
+                outputGood = true;
+            }
+            if (outputGood)
+            {
+                for (int i = 0; i < files.Length; i++)
+                {
+                    string getDirectoryName = Path.GetDirectoryName(files[i]);
+                    fileName = files[i];
+                    fileNumber = fileNumberInt.ToString();
+                    //listView1.Items.Add(new ListViewItem(new string[] { "1", "content" }));
+                    ListViewItem item = new ListViewItem(new[] { fileNumber, fileName, pageCount, "N/A", getDirectoryName });
+                    lstBatesFiles.Items.Add(item);
+                    fileNumberInt++;
+                }
+                if (Globals.matchFolderStructure)
+                {
+                    Globals.basePath = GetBasePath();
+                }
+                for (int i = 0; i < files.Length; i++)
+                {
+                    UpdateStatus((i + 1), files.Length, Activity.ADDING_FILES);
+                    fileName = files[i];
+                    if (Path.GetExtension(fileName) == ".pdf" || Path.GetExtension(fileName) == ".gif" || Path.GetExtension(fileName) == ".bmp" || Path.GetExtension(fileName) == ".jpeg"
+                        || Path.GetExtension(fileName) == ".jpg" || Path.GetExtension(fileName) == ".png" || Path.GetExtension(fileName) == ".tif" || Path.GetExtension(fileName) == ".tiff")
+                    {
+                        //Move
+                        fileNameOnly = Path.GetFileName(fileName);
+                        outputPath = outputFolder + @"\" + fileNameOnly;
+                        outputPath = NextAvailableFilename(outputPath, i);
+                        File.Copy(fileName, outputPath);
+                    }
+                    else if (Path.GetExtension(fileName) == ".doc" || Path.GetExtension(fileName) == ".dot" || Path.GetExtension(fileName) == ".docx" || Path.GetExtension(fileName) == ".docm"
+                        || Path.GetExtension(fileName) == ".dotx" || Path.GetExtension(fileName) == ".dotm" || Path.GetExtension(fileName) == ".docb")
+                    {
+                        try
+                        {
+                            Word2Pdf objWordToPDF = new Word2Pdf();
+
+                            string fileExtention = Path.GetExtension(fileName);
+
+                            //fileNameOnly = Path.GetFileName(fileName);
+                            //Might need to change this, replaces every instance of .pdf in path, might be multiple?
+                            string changeExtension = fileName.Replace(fileExtention, ".pdf");
+                            changeExtension = NextAvailableFilename(changeExtension, i);
+                            object FromLocation = fileName;
+                            object ToLocation = changeExtension;
+                            objWordToPDF.InputLocation = FromLocation;
+                            //WRITE TO DISK                        
+                            objWordToPDF.OutputLocation = ToLocation;
+                            objWordToPDF.Word2PdfCOnversion();
+                        }
+                        catch (Exception e)
+                        {
+                            unConverted = unConverted + files[i] + "\n";
+                        }
+                    }
+                    else if (Path.GetExtension(fileName) == ".txt")
+                    {
+                        try
+                        {
+                            string fileExtention = Path.GetExtension(fileName);
+                            //Might need to change this, replaces every instance of .pdf in path, might be multiple?
+                            string changeExtension = fileName.Replace(fileExtention, ".pdf");
+                            changeExtension = NextAvailableFilename(changeExtension, i);
+                            TextPDF.PdfWriter txtPdfWriter = new TextPDF.PdfWriter(842.0f, 1190.0f, 72.0f, 10.0f);
+                            txtPdfWriter.OutputStreamPath = changeExtension;
+                            txtPdfWriter.Write(fileName);
+                        }
+                        catch (Exception e)
+                        {
+                            unConverted = unConverted + files[i] + "\n";
+                        }
+                    }
+                    else
+                    {
+                        unConverted = unConverted + files[i] + "\n";
+                    }
+                }
+                if (unConverted == "")
+                {
+                    MessageBox.Show("Shit done, yo!", Globals.appName, MessageBoxButtons.OK);
+                }
+                else
+                {
+                    MessageBox.Show("The following files were invalid types \n" + unConverted, Globals.appName, MessageBoxButtons.OK);
+                }
+            }
+        }
         public int PageCountWord(object Path)
         {
             // Get application object
@@ -2453,6 +2583,13 @@ namespace PDFUtility
         {
             get { return _delimeter; }
             set { _delimeter = value; }
+        }
+
+        private static bool _convertOnly = false;
+        public static bool convertOnly
+        {
+            get { return _convertOnly; }
+            set { _convertOnly = value; }
         }
     }
 }
