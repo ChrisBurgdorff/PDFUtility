@@ -74,6 +74,7 @@ namespace PDFUtilityHistory
         private void btnExportHistory_Click(object sender, EventArgs e)
         {
             ExportToExcel(lstHistory);
+            //Fake Line
         }
     }
 }
