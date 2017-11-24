@@ -49,6 +49,14 @@
             this.comboBoxFontSize = new System.Windows.Forms.ComboBox();
             this.lblSize = new System.Windows.Forms.Label();
             this.groupBoxFont = new System.Windows.Forms.GroupBox();
+            this.btnAdvanced = new System.Windows.Forms.Button();
+            this.chkFolderStructure = new System.Windows.Forms.CheckBox();
+            this.chkSmartImages = new System.Windows.Forms.CheckBox();
+            this.chkIgnoreAlerts = new System.Windows.Forms.CheckBox();
+            this.btnCheckExtensions = new System.Windows.Forms.Button();
+            this.txtDelimeter = new System.Windows.Forms.TextBox();
+            this.lblDelimeter = new System.Windows.Forms.Label();
+            this.chkConvertOnly = new System.Windows.Forms.CheckBox();
             ((System.ComponentModel.ISupportInitialize)(this.trackTransparency)).BeginInit();
             this.groupBoxFont.SuspendLayout();
             this.SuspendLayout();
@@ -290,12 +298,101 @@
             this.groupBoxFont.TabStop = false;
             this.groupBoxFont.Text = "Font";
             // 
+            // btnAdvanced
+            // 
+            this.btnAdvanced.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
+            this.btnAdvanced.Location = new System.Drawing.Point(572, 9);
+            this.btnAdvanced.Name = "btnAdvanced";
+            this.btnAdvanced.Size = new System.Drawing.Size(107, 49);
+            this.btnAdvanced.TabIndex = 20;
+            this.btnAdvanced.Text = "Show Advanced Options";
+            this.btnAdvanced.UseVisualStyleBackColor = true;
+            this.btnAdvanced.Click += new System.EventHandler(this.btnAdvanced_Click);
+            // 
+            // chkFolderStructure
+            // 
+            this.chkFolderStructure.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.chkFolderStructure.AutoSize = true;
+            this.chkFolderStructure.Location = new System.Drawing.Point(716, 89);
+            this.chkFolderStructure.Name = "chkFolderStructure";
+            this.chkFolderStructure.Size = new System.Drawing.Size(129, 17);
+            this.chkFolderStructure.TabIndex = 21;
+            this.chkFolderStructure.Text = "Keep Folder Structure";
+            this.chkFolderStructure.UseVisualStyleBackColor = true;
+            // 
+            // chkSmartImages
+            // 
+            this.chkSmartImages.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.chkSmartImages.AutoSize = true;
+            this.chkSmartImages.Location = new System.Drawing.Point(716, 130);
+            this.chkSmartImages.Name = "chkSmartImages";
+            this.chkSmartImages.Size = new System.Drawing.Size(144, 17);
+            this.chkSmartImages.TabIndex = 22;
+            this.chkSmartImages.Text = "SmartStamp Images Only";
+            this.chkSmartImages.UseVisualStyleBackColor = true;
+            // 
+            // chkIgnoreAlerts
+            // 
+            this.chkIgnoreAlerts.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.chkIgnoreAlerts.AutoSize = true;
+            this.chkIgnoreAlerts.Location = new System.Drawing.Point(716, 176);
+            this.chkIgnoreAlerts.Name = "chkIgnoreAlerts";
+            this.chkIgnoreAlerts.Size = new System.Drawing.Size(85, 17);
+            this.chkIgnoreAlerts.TabIndex = 23;
+            this.chkIgnoreAlerts.Text = "Ignore Alerts";
+            this.chkIgnoreAlerts.UseVisualStyleBackColor = true;
+            // 
+            // btnCheckExtensions
+            // 
+            this.btnCheckExtensions.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
+            this.btnCheckExtensions.Location = new System.Drawing.Point(730, 233);
+            this.btnCheckExtensions.Name = "btnCheckExtensions";
+            this.btnCheckExtensions.Size = new System.Drawing.Size(99, 44);
+            this.btnCheckExtensions.TabIndex = 24;
+            this.btnCheckExtensions.Text = "Check Extensions";
+            this.btnCheckExtensions.UseVisualStyleBackColor = true;
+            this.btnCheckExtensions.Click += new System.EventHandler(this.btnCheckExtensions_Click);
+            // 
+            // txtDelimeter
+            // 
+            this.txtDelimeter.Location = new System.Drawing.Point(787, 325);
+            this.txtDelimeter.Name = "txtDelimeter";
+            this.txtDelimeter.Size = new System.Drawing.Size(55, 20);
+            this.txtDelimeter.TabIndex = 25;
+            // 
+            // lblDelimeter
+            // 
+            this.lblDelimeter.AutoSize = true;
+            this.lblDelimeter.Location = new System.Drawing.Point(727, 328);
+            this.lblDelimeter.Name = "lblDelimeter";
+            this.lblDelimeter.Size = new System.Drawing.Size(54, 13);
+            this.lblDelimeter.TabIndex = 26;
+            this.lblDelimeter.Text = "Delimeter:";
+            // 
+            // chkConvertOnly
+            // 
+            this.chkConvertOnly.AutoSize = true;
+            this.chkConvertOnly.Location = new System.Drawing.Point(716, 53);
+            this.chkConvertOnly.Name = "chkConvertOnly";
+            this.chkConvertOnly.Size = new System.Drawing.Size(87, 17);
+            this.chkConvertOnly.TabIndex = 27;
+            this.chkConvertOnly.Text = "Convert Only";
+            this.chkConvertOnly.UseVisualStyleBackColor = true;
+            // 
             // formOptions
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.SystemColors.MenuBar;
-            this.ClientSize = new System.Drawing.Size(703, 580);
+            this.ClientSize = new System.Drawing.Size(885, 580);
+            this.Controls.Add(this.chkConvertOnly);
+            this.Controls.Add(this.lblDelimeter);
+            this.Controls.Add(this.txtDelimeter);
+            this.Controls.Add(this.btnCheckExtensions);
+            this.Controls.Add(this.chkIgnoreAlerts);
+            this.Controls.Add(this.chkSmartImages);
+            this.Controls.Add(this.chkFolderStructure);
+            this.Controls.Add(this.btnAdvanced);
             this.Controls.Add(this.groupBoxFont);
             this.Controls.Add(this.btnResetDefault);
             this.Controls.Add(this.comboBoxLocation);
@@ -344,5 +441,13 @@
         private System.Windows.Forms.ComboBox comboBoxFontSize;
         private System.Windows.Forms.Label lblSize;
         private System.Windows.Forms.GroupBox groupBoxFont;
+        private System.Windows.Forms.Button btnAdvanced;
+        private System.Windows.Forms.CheckBox chkFolderStructure;
+        private System.Windows.Forms.CheckBox chkSmartImages;
+        private System.Windows.Forms.CheckBox chkIgnoreAlerts;
+        private System.Windows.Forms.Button btnCheckExtensions;
+        private System.Windows.Forms.TextBox txtDelimeter;
+        private System.Windows.Forms.Label lblDelimeter;
+        private System.Windows.Forms.CheckBox chkConvertOnly;
     }
 }
