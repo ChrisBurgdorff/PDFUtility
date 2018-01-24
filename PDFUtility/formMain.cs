@@ -732,7 +732,7 @@ namespace PDFUtility
             IComparer comparer = new AlphanumComparator.NumericComparer();
             
             Array.Sort(files, comparer);
-            Array.Sort(files);
+            //Array.Sort(files);
             path = folderPath;
             if (files.Length > 0)
             {

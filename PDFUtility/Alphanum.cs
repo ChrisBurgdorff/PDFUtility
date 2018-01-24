@@ -120,12 +120,19 @@ namespace AlphanumComparator
             string s1 = x as string;
             string s2 = y as string;
 
+            string numS1 = "", numS2 = "";
+
+            if (s1 == null || s2 == null)
+            {
+                return 0;
+            }
+
             string lowS1 = s1.ToLower();
             string lowS2 = s2.ToLower();
 
             int minLength = Math.Min(lowS1.Length, lowS2.Length);
-            int i = 0, j = 0;
-            int numDigitsS1 = 0, numDigitsS2 = 0;
+            int i = 0, j = 0, iNum = 0, jNum = 0;
+            //int numDigitsS1 = 0, numDigitsS2 = 0;
 
             while (i < minLength && j < minLength)
             {
@@ -178,9 +185,30 @@ namespace AlphanumComparator
                     }
                     else
                     { //FILE55NEW   012345678
-                        numDigitsS1 = 0;
-                        numDigitsS2 = 0;
-
+                        iNum = 0;
+                        jNum = 0;
+                        numS1 = "";
+                        numS2 = "";
+                        while (char.IsDigit(lowS1[i + iNum]))
+                        {
+                            numS1 = numS1 + lowS1[i+iNum];
+                            iNum++;
+                        }
+                        i = i + iNum;
+                        while (char.IsDigit(lowS2[j + jNum]))
+                        {
+                            numS2 = numS2 + lowS2[j + jNum];
+                            jNum++;
+                        }
+                        j = j + jNum;
+                        if (Convert.ToInt64(numS1) < Convert.ToInt64(numS2))
+                        {
+                            return -1;
+                        }
+                        else if (Convert.ToInt64(numS1) > Convert.ToInt64(numS2))
+                        {
+                            return 1;
+                        }
                     }
                 }
             }
