@@ -38,8 +38,10 @@ namespace AlphanumComparator
                 return 0;
             }
 
-            int thisMarker = 0, thisNumericChunk = 0;
-            int thatMarker = 0, thatNumericChunk = 0;
+            int thisMarker = 0;
+            int thatMarker = 0;
+
+            long thisNumericChunk = 0, thatNumericChunk = 0;
 
             while ((thisMarker < s1.Length) || (thatMarker < s2.Length))
             {
@@ -83,8 +85,8 @@ namespace AlphanumComparator
                 // If both chunks contain numeric characters, sort them numerically
                 if (char.IsDigit(thisChunk[0]) && char.IsDigit(thatChunk[0]))
                 {
-                    thisNumericChunk = Convert.ToInt32(thisChunk.ToString());
-                    thatNumericChunk = Convert.ToInt32(thatChunk.ToString());
+                    thisNumericChunk = Convert.ToInt64(thisChunk.ToString());
+                    thatNumericChunk = Convert.ToInt64(thatChunk.ToString());
 
                     if (thisNumericChunk < thatNumericChunk)
                     {
@@ -104,6 +106,82 @@ namespace AlphanumComparator
                 if (result != 0)
                 {
                     return result;
+                }
+            }
+
+            return 0;
+        }
+    }
+
+    public class NumericComparer : IComparer
+    {
+        public int Compare(object x, object y)
+        {
+            string s1 = x as string;
+            string s2 = y as string;
+
+            string lowS1 = s1.ToLower();
+            string lowS2 = s2.ToLower();
+
+            int minLength = Math.Min(lowS1.Length, lowS2.Length);
+            int i = 0, j = 0;
+            int numDigitsS1 = 0, numDigitsS2 = 0;
+
+            while (i < minLength && j < minLength)
+            {
+                if (!char.IsDigit(lowS1[i]) && !char.IsDigit(lowS2[j]))
+                {
+                    if (lowS1[i] == '\\' && lowS2[j] != '\\')
+                    {
+                        //s1 comes first
+                        return -1;
+                    }
+                    else if (lowS2[i] == '\\' && lowS1[j] != '\\')
+                    {
+                        //s2 comes first
+                        return 1;
+                    }
+                    else if (lowS1[i] < lowS2[j])
+                    {
+                        //s1 comes first
+                        return -1;
+                    }
+                    else if (lowS1[i] > lowS2[j])
+                    {
+                        //s2 comes first
+                        return 1;
+                    }
+                    i++; j++;
+                }
+                else
+                {
+                    if (lowS1[i] == '\\' && lowS2[j] != '\\')
+                    {
+                        //s1 comes first
+                        return -1;
+                    }
+                    else if (lowS2[i] == '\\' && lowS1[j] != '\\')
+                    {
+                        //s2 comes first
+                        return 1;
+                    }
+                    else if ((char.IsDigit(lowS1[i]) && !char.IsDigit(lowS2[j])) || (!char.IsDigit(lowS1[i]) && char.IsDigit(lowS2[j])))
+                    {
+                        if (lowS1[i] < lowS2[j])
+                        {
+                            return -1;
+                        }
+                        else
+                        {
+                            return 1;
+                        }
+                    }
+                    else
+                    { //FILE55NEW   012345678
+                        numDigitsS1 = 0;
+                        numDigitsS2 = 0;
+
+                    }
                 }
             }
 

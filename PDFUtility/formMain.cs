@@ -729,8 +729,9 @@ namespace PDFUtility
             {
                 files = Directory.GetFiles(folderPath, "*.*");
             }            
-            IComparer comparer = new AlphanumComparator.AlphanumComparator();
-            //Array.Sort(files, comparer);
+            IComparer comparer = new AlphanumComparator.NumericComparer();
+            
+            Array.Sort(files, comparer);
             Array.Sort(files);
             path = folderPath;
             if (files.Length > 0)
