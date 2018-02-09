@@ -1286,6 +1286,7 @@ namespace PDFUtility
             if (outputGood)
             {
                 Globals.toStamp.Clear();
+                float originalFontSize = Globals.font.Size;
                 for (int i = 0; i < files.Length; i++)
                 {
                     fileName = files[i];
@@ -1347,7 +1348,7 @@ namespace PDFUtility
                                         int fakeVarForBreak = 420;
                                     }  */
                                     var batesStamp = batesPrefix + delimeter + ConstantNumber(currentBates, numDigits);
-                                    Phrase p = new Phrase(batesStamp, font);
+                                    //Phrase p = new Phrase(batesStamp, font);
                                     currentBates++;
                                     float height = reader.GetCropBox(j).Height;
                                     float width = reader.GetCropBox(j).Width;
@@ -1363,6 +1364,11 @@ namespace PDFUtility
                                     }
                                     int alignment;
 
+                                    //Correct font size in different sized images
+                                    
+                                    float resizeFactor = width / 612;
+                                    font.Size = (originalFontSize * resizeFactor);
+                                    Phrase p = new Phrase(batesStamp, font);
                                     switch (Globals.stampLocation)
                                     {
                                         case StampLocation.CENTER:
@@ -1372,38 +1378,38 @@ namespace PDFUtility
                                             break;
                                         case StampLocation.CENTER_BOTTOM:
                                             printX = width / 2;
-                                            printY = 20;
+                                            printY = 20 * resizeFactor;
                                             alignment = Element.ALIGN_CENTER;
                                             break;
                                         case StampLocation.CENTER_TOP:
                                             printX = width / 2;
-                                            printY = height - 20;
+                                            printY = height - (20 * resizeFactor);
                                             alignment = Element.ALIGN_CENTER;
                                             break;
                                         case StampLocation.LOWER_LEFT:
-                                            printX = 20;
-                                            printY = 20;
+                                            printX = 20 * resizeFactor;
+                                            printY = 20 * resizeFactor;
                                             alignment = Element.ALIGN_LEFT;
                                             break;
                                         case StampLocation.LOWER_RIGHT:
-                                            printX = width - 20;
-                                            printY = 20;
+                                            printX = width - (20 * resizeFactor);
+                                            printY = 20 * resizeFactor;
                                             alignment = Element.ALIGN_RIGHT;
                                             break;
                                         case StampLocation.UPPER_LEFT:
-                                            printX = 20;
-                                            printY = height - 20;
+                                            printX = 20 * resizeFactor;
+                                            printY = height - (20 * resizeFactor);
                                             alignment = Element.ALIGN_LEFT;
                                             break;
                                         case StampLocation.UPPER_RIGHT:
-                                            printX = width - 20;
-                                            printY = height - 20;
+                                            printX = width - (20 * resizeFactor);
+                                            printY = height - (20 * resizeFactor);
                                             alignment = Element.ALIGN_RIGHT;
                                             break;
                                         default:
                                             //Default: lower right
-                                            printX = width - 20;
-                                            printY = 20;
+                                            printX = width - (20 * resizeFactor);
+                                            printY = 20 * resizeFactor;
                                             alignment = Element.ALIGN_RIGHT;
                                             break;
                                     }//End Switch
@@ -2210,12 +2216,49 @@ namespace PDFUtility
                     file.Delete();
                 }
                 Globals.currentBates = currentBates;
+                Globals.font.Size = originalFontSize;
                 form1.UpdateCurrentBatesNumber(currentBates, batesPrefix);
                 MessageBox.Show("Bates Stamping Complete.", Globals.appName);
             }
         }
         #endregion
-                
+
+        private void SmartStampTest(string[] files)
+        {
+            string fileName = "";
+            for (var i = 0; i < files.Length; i++)
+            {
+                fileName = files[i];
+                using (var reader = new PdfReader(fileName))
+                {
+                    PdfObject pObject;
+                    int n = reader.XrefSize;
+                    for (int j = 0; j < n; j++)
+                    {
+                        pObject = reader.GetPdfObject(j);
+                        if (pObject == null || !pObject.IsStream())
+                        {
+                            continue;
+                        }
+                        PRStream stream = (PRStream)pObject;
+                        PdfImage image = new PdfImage(stream);
+                    }
+                }
+            }
+        }
+        private void btnSmartTesting_Click(object sender, EventArgs e)
+        {
+            string fullPath = "";
+            string[] files;
+            List<string> fileCollection = new List<string>();
+            for (int i = 0; i < lstBatesFiles.Items.Count; i++)
+            {
+                fullPath = lstBatesFiles.Items[i].SubItems[4].Text + @"\" + lstBatesFiles.Items[i].SubItems[1].Text;
+                fileCollection.Add(fullPath);
+            }
+            files = fileCollection.ToArray();
+            SmartStampTest(files);
+        }
     }
 
     public partial class PDFUtility

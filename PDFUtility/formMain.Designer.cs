@@ -75,6 +75,7 @@
             this.btnSelectOutput = new System.Windows.Forms.Button();
             this.btnExportExcel = new System.Windows.Forms.Button();
             this.lblLastStamped = new System.Windows.Forms.Label();
+            this.btnSmartTesting = new System.Windows.Forms.Button();
             this.menuStrip1.SuspendLayout();
             this.toolStrip1.SuspendLayout();
             this.statusStrip1.SuspendLayout();
@@ -338,7 +339,7 @@
             // 
             this.viewHistoryToolStripMenuItem.Image = ((System.Drawing.Image)(resources.GetObject("viewHistoryToolStripMenuItem.Image")));
             this.viewHistoryToolStripMenuItem.Name = "viewHistoryToolStripMenuItem";
-            this.viewHistoryToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.viewHistoryToolStripMenuItem.Size = new System.Drawing.Size(142, 22);
             this.viewHistoryToolStripMenuItem.Text = "View History";
             this.viewHistoryToolStripMenuItem.Click += new System.EventHandler(this.viewHistoryToolStripMenuItem_Click);
             // 
@@ -490,12 +491,23 @@
             this.lblLastStamped.Text = "label1";
             this.lblLastStamped.Visible = false;
             // 
+            // btnSmartTesting
+            // 
+            this.btnSmartTesting.Location = new System.Drawing.Point(714, 160);
+            this.btnSmartTesting.Name = "btnSmartTesting";
+            this.btnSmartTesting.Size = new System.Drawing.Size(163, 44);
+            this.btnSmartTesting.TabIndex = 16;
+            this.btnSmartTesting.Text = "button1";
+            this.btnSmartTesting.UseVisualStyleBackColor = true;
+            this.btnSmartTesting.Click += new System.EventHandler(this.btnSmartTesting_Click);
+            // 
             // formMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.SystemColors.MenuBar;
             this.ClientSize = new System.Drawing.Size(1090, 550);
+            this.Controls.Add(this.btnSmartTesting);
             this.Controls.Add(this.lblLastStamped);
             this.Controls.Add(this.btnExportExcel);
             this.Controls.Add(this.toolStrip1);
@@ -575,6 +587,7 @@
         private System.Windows.Forms.Label lblLastStamped;
         private System.Windows.Forms.ToolStripMenuItem projectToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem viewHistoryToolStripMenuItem;
+        private System.Windows.Forms.Button btnSmartTesting;
     }
 }
 
