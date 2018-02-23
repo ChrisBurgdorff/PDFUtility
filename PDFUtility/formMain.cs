@@ -54,6 +54,8 @@ namespace PDFUtility
     public partial class formMain : Form
     {
         //MAIN TODO LIST
+        //Next stamp number drops off leading zeros after stamp
+        //Font normalizer don't work for landscape pages
         //Advanced Options - Rename files, increment prefix
         //Fonts not saving - done, not tested
         //Test file6.pdf last page not printing in correct spot - Possibly fixed
@@ -66,14 +68,14 @@ namespace PDFUtility
         //Add hot keys
         //Constant number of digits - done not tested
         //Keep track of shit for undo
-        //Ask for feature ideas
+        //Ask for feature ideas - Done
         //Create installer
         //Smart Stamping for Images??? - Done
         //Excel format everything as text first... Fucking Excel - Done
         //Look into why progress bar not showing right percentage
         //Associate file extension and give icon
         //"Garbage collect" after conversion, doc and pdf files showing in original folder
-        //Alphanum comparator doesn't handle more than 32 bit integers - Disabled for now, but either change it to 64 bit or wrap in a try-catch.
+        //Alphanum comparator doesn't handle more than 32 bit integers - Disabled for now, but either change it to 64 bit or wrap in a try-catch. think i fixed it
         //Extend margins on text - PDF conversion
         //blank page on text files?  WTF
         //Save Shit to stamp - done, not tested
@@ -128,6 +130,7 @@ namespace PDFUtility
                 saveToolStripMenuItem.Enabled = false;
             }
         }*/
+
 
         private string GetBasePath()
         {
@@ -2241,7 +2244,7 @@ namespace PDFUtility
                             continue;
                         }
                         PRStream stream = (PRStream)pObject;
-                        PdfImage image = new PdfImage(stream);
+                        //PdfImage image = new PdfImage(stream);
                     }
                 }
             }
