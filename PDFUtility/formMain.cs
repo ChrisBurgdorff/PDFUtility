@@ -296,6 +296,7 @@ namespace PDFUtility
             using (Graphics grD = Graphics.FromImage(destBitmap))
             {
                 grD.DrawImage(srcBitmap, destRegion, srcRegion, GraphicsUnit.Pixel);
+                string fakeVar = "DELETEME TODO";
             }
         }
 
